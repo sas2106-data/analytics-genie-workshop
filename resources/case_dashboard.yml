@@ -1,0 +1,14 @@
+# Module 3 — AI/BI dashboard over the gold view and the certified metric view
+resources:
+  dashboards:
+    case_overview:
+      display_name: Case Overview
+      file_path: ../dashboards/case_overview.lvdash.json
+      warehouse_id: ${var.warehouse_id}
+      dataset_catalog: ${var.catalog}          # unqualified table names in the datasets resolve here
+      dataset_schema: ${var.target_schema}
+      embed_credentials: false                 # viewers query with their own Unity Catalog permissions
+      # Module 5 — who can view the published dashboard
+      permissions:
+        - group_name: ${var.group_name}
+          level: CAN_RUN

@@ -1,0 +1,46 @@
+# Module 4 — Genie Agent (Genie space) over the same gold view and metric view
+# Tip: build it in the UI first, then:  databricks bundle generate genie-space --existing-id <id>
+resources:
+  genie_spaces:
+    case_genie:
+      title: Cases & Customers — Genie
+      description: Ask about case volumes, open cases, days to close and SLA by segment, region, case type and channel.
+      warehouse_id: ${var.warehouse_id}
+      serialized_space:
+        version: 2
+        config:
+          sample_questions:
+            - { id: "a2000000000000000000000000000001", question: [ "How many cases are open by segment?" ] }
+            - { id: "a2000000000000000000000000000002", question: [ "What is the SLA met rate by priority?" ] }
+            - { id: "a2000000000000000000000000000003", question: [ "Which channel has the longest average days to close?" ] }
+            - { id: "a2000000000000000000000000000004", question: [ "Show monthly case volumes for Complaints over the last 6 months" ] }
+        data_sources:
+          tables:
+            - identifier: ${var.catalog}.${var.target_schema}.case_customer
+              description: [ "Gold view: one row per case joined to its customer (segment, region, VIP), with status, days_to_close and within_sla." ]
+            - identifier: ${var.catalog}.${var.target_schema}.case_metrics
+              description: [ "Certified metric view: total_cases, open_cases, avg_days_to_close, sla_met_rate, customers_with_cases. Query measures with MEASURE()." ]
+        instructions:
+          text_instructions:
+            - id: "b2000000000000000000000000000001"
+              content:
+                - |
+                  You answer questions about customer service cases.
+                  - Prefer the certified metric view case_metrics for KPIs; use MEASURE(<measure>) and GROUP BY the dimensions asked for.
+                  - "Open" means not closed (status open or pending). "SLA" means sla_met_rate: closed within the target days for the priority (high 2, medium 5, low 10).
+                  - "Days to close" is avg_days_to_close and only counts closed cases.
+                  - Segment 'Unknown' means the case's customer is missing from the customer master; mention it if it appears.
+                  - Show rates as percentages with one decimal and days with one decimal.
+          example_question_sqls:
+            - id: "c2000000000000000000000000000001"
+              question: [ "How many cases are open by segment?" ]
+              sql:
+                - "SELECT segment, MEASURE(open_cases) AS open_cases, MEASURE(total_cases) AS total_cases FROM ${var.catalog}.${var.target_schema}.case_metrics GROUP BY ALL ORDER BY open_cases DESC"
+            - id: "c2000000000000000000000000000002"
+              question: [ "What is the SLA met rate by priority?" ]
+              sql:
+                - "SELECT priority, ROUND(100 * MEASURE(sla_met_rate), 1) AS sla_met_pct, MEASURE(closed_cases) AS closed_cases FROM ${var.catalog}.${var.target_schema}.case_metrics GROUP BY ALL ORDER BY sla_met_pct"
+      # Module 5 — who can ask questions
+      permissions:
+        - group_name: ${var.group_name}
+          level: CAN_RUN

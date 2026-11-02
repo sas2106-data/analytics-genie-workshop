@@ -1,0 +1,819 @@
+{
+  "datasets": [
+    {
+      "name": "cases",
+      "displayName": "Cases (gold view)",
+      "queryLines": [
+        "SELECT case_id, opened_month, case_type, channel, priority, segment, region,\n",
+        "       CAST(is_open AS INT) AS is_open, days_to_close, CAST(within_sla AS INT) AS within_sla\n",
+        "FROM case_customer"
+      ]
+    },
+    {
+      "name": "certified",
+      "displayName": "Certified metrics (metric view)",
+      "queryLines": [
+        "SELECT segment, region,\n",
+        "       MEASURE(total_cases) AS total_cases, MEASURE(open_cases) AS open_cases,\n",
+        "       MEASURE(avg_days_to_close) AS avg_days_to_close, MEASURE(sla_met_rate) AS sla_met_rate,\n",
+        "       MEASURE(customers_with_cases) AS customers_with_cases\n",
+        "FROM case_metrics\nGROUP BY ALL"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "75207bb0",
+      "displayName": "Case overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "f7f8a850",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Case Overview\n",
+                "Gold view `case_customer` and certified metric view `case_metrics` \u00b7 synthetic data \u00b7 use the filters to slice by region, segment and case type\n"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "aec9e98a",
+            "queries": [
+              {
+                "name": "f_region_cases",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "region",
+                      "expression": "`region`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "f_region_certified",
+                "query": {
+                  "datasetName": "certified",
+                  "fields": [
+                    {
+                      "name": "region",
+                      "expression": "`region`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "region",
+                    "displayName": "Region",
+                    "queryName": "f_region_cases"
+                  },
+                  {
+                    "fieldName": "region",
+                    "displayName": "Region",
+                    "queryName": "f_region_certified"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Region"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "896d5628",
+            "queries": [
+              {
+                "name": "f_segment_cases",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "segment",
+                      "expression": "`segment`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "f_segment_certified",
+                "query": {
+                  "datasetName": "certified",
+                  "fields": [
+                    {
+                      "name": "segment",
+                      "expression": "`segment`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "segment",
+                    "displayName": "Segment",
+                    "queryName": "f_segment_cases"
+                  },
+                  {
+                    "fieldName": "segment",
+                    "displayName": "Segment",
+                    "queryName": "f_segment_certified"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Segment"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 2,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "eb2c9dff",
+            "queries": [
+              {
+                "name": "f_case_type_cases",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "case_type",
+                      "expression": "`case_type`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "case_type",
+                    "displayName": "Case type",
+                    "queryName": "f_case_type_cases"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Case type"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 2,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "60d54f89",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "total_cases",
+                      "expression": "COUNT(`case_id`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_cases",
+                  "displayName": "Total cases",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Total cases"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "9cc45a46",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "open_cases",
+                      "expression": "SUM(`is_open`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "open_cases",
+                  "displayName": "Open cases",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Open cases"
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 4,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "7d03a017",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "avg_days",
+                      "expression": "AVG(`days_to_close`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_days",
+                  "displayName": "Avg days to close",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Avg days to close"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 4,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "311b3a19",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "sla_rate",
+                      "expression": "AVG(`within_sla`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sla_rate",
+                  "displayName": "SLA met (closed cases)",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "SLA met (closed cases)"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 4,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "8e8bb806",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "opened_month",
+                      "expression": "`opened_month`"
+                    },
+                    {
+                      "name": "cases",
+                      "expression": "COUNT(`case_id`)"
+                    },
+                    {
+                      "name": "case_type",
+                      "expression": "`case_type`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "opened_month",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Opened month"
+                },
+                "y": {
+                  "fieldName": "cases",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Cases"
+                },
+                "color": {
+                  "fieldName": "case_type",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Case type"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Cases opened per month by case type"
+              },
+              "mark": {
+                "colors": [
+                  "#1B3139",
+                  "#FF3621",
+                  "#00A972",
+                  "#F2A900",
+                  "#2272B4",
+                  "#8BCAE7"
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "c08728a9",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "case_type",
+                      "expression": "`case_type`"
+                    },
+                    {
+                      "name": "open_cases",
+                      "expression": "SUM(`is_open`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "y": {
+                  "fieldName": "case_type",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  },
+                  "displayName": "Case type"
+                },
+                "x": {
+                  "fieldName": "open_cases",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Open cases",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Open cases by case type"
+              },
+              "mark": {
+                "colors": [
+                  "#FF3621"
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 7,
+            "width": 2,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "c4b50fd5",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    },
+                    {
+                      "name": "avg_days",
+                      "expression": "AVG(`days_to_close`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "y": {
+                  "fieldName": "channel",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  },
+                  "displayName": "Channel"
+                },
+                "x": {
+                  "fieldName": "avg_days",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Avg days to close",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Avg days to close by channel"
+              },
+              "mark": {
+                "colors": [
+                  "#1B3139"
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "9a48e0d9",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cases",
+                  "fields": [
+                    {
+                      "name": "priority",
+                      "expression": "`priority`"
+                    },
+                    {
+                      "name": "sla_rate",
+                      "expression": "AVG(`within_sla`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "y": {
+                  "fieldName": "priority",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  },
+                  "displayName": "Priority"
+                },
+                "x": {
+                  "fieldName": "sla_rate",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "SLA met",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "SLA met by priority"
+              },
+              "mark": {
+                "colors": [
+                  "#00A972"
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 13,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "52b3a914",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "certified",
+                  "fields": [
+                    {
+                      "name": "segment",
+                      "expression": "`segment`"
+                    },
+                    {
+                      "name": "region",
+                      "expression": "`region`"
+                    },
+                    {
+                      "name": "total_cases",
+                      "expression": "`total_cases`"
+                    },
+                    {
+                      "name": "open_cases",
+                      "expression": "`open_cases`"
+                    },
+                    {
+                      "name": "avg_days_to_close",
+                      "expression": "`avg_days_to_close`"
+                    },
+                    {
+                      "name": "sla_met_rate",
+                      "expression": "`sla_met_rate`"
+                    },
+                    {
+                      "name": "customers_with_cases",
+                      "expression": "`customers_with_cases`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "segment",
+                    "displayName": "Segment"
+                  },
+                  {
+                    "fieldName": "region",
+                    "displayName": "Region"
+                  },
+                  {
+                    "fieldName": "total_cases",
+                    "displayName": "Total cases",
+                    "format": {
+                      "type": "number-plain",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 0
+                      }
+                    }
+                  },
+                  {
+                    "fieldName": "open_cases",
+                    "displayName": "Open cases",
+                    "format": {
+                      "type": "number-plain",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 0
+                      }
+                    }
+                  },
+                  {
+                    "fieldName": "avg_days_to_close",
+                    "displayName": "Avg days to close",
+                    "format": {
+                      "type": "number-plain",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 1
+                      }
+                    }
+                  },
+                  {
+                    "fieldName": "sla_met_rate",
+                    "displayName": "SLA met rate",
+                    "format": {
+                      "type": "number-percent",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 1
+                      }
+                    }
+                  },
+                  {
+                    "fieldName": "customers_with_cases",
+                    "displayName": "Customers",
+                    "format": {
+                      "type": "number-plain",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 0
+                      }
+                    }
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Certified metrics by segment and region (metric view case_metrics)"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 19,
+            "width": 6,
+            "height": 7
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ]
+}

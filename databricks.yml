@@ -1,0 +1,43 @@
+# Two Tables → Gold View → Certified Metrics → Dashboard + Genie workshop
+# Set variables once per shell (works in bash and zsh):
+#   export BUNDLE_VAR_catalog=main BUNDLE_VAR_schema=<source schema> BUNDLE_VAR_target_schema=<gold schema> \
+#          BUNDLE_VAR_warehouse_id=<id> BUNDLE_VAR_group_name=<group>
+# Then:    databricks bundle validate -t dev && databricks bundle deploy -t dev
+#          databricks bundle run analytics_build -t dev    (setup → gold view → metric view)
+bundle:
+  name: analytics-genie-workshop
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Catalog that holds the source tables
+    default: main
+  schema:
+    description: Schema that holds the cases and customers tables — provided at deploy/run time
+  cases_table:
+    default: cases
+  customers_table:
+    default: customers
+  target_schema:
+    description: Schema for the gold view and metric view (the dashboard and Genie read from here)
+  create_sample_data:
+    description: Create synthetic cases/customers tables if they don't exist (dry runs only)
+    default: "false"
+  warehouse_id:
+    description: Serverless SQL warehouse for the dashboard and the Genie space
+  group_name:
+    description: Account-level group (e.g. synced from Entra ID) that gets access
+    default: workshop-users
+
+targets:
+  dev:
+    mode: development
+    default: true
+  prod:
+    mode: production
+    # In prod, deploy from CI as a service principal, e.g.:
+    # variables:
+    #   schema: crm
+    #   target_schema: reporting_gold

@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="Analytics workshop architecture: two source tables, cases and customers, are profiled and joined on customer_id into a documented gold view, case_customer, and a certified metric view, case_metrics, in Unity Catalog. An AI/BI dashboard for report developers and a Genie Agent for business users both read the same gold view and metric view on a serverless SQL warehouse. A Databricks Asset Bundle in Git deploys the build job, dashboard and Genie Agent. Panels list what must be enabled.">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1b2433"/></marker>
+  </defs>
+  <rect width="1200" height="900" fill="#ffffff"/>
+  <text x="20" y="34" font-size="20" font-weight="700" fill="#1b2433">Two tables → gold view → certified metrics → dashboard + Genie · workshop architecture</text>
+  <text x="20" y="56" font-size="13" fill="#5b6576">One governed dataset, two consumption surfaces. A developer's chart and a business user's question return the same numbers.</text>
+
+  <!-- sources -->
+  <text x="110" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#d9480f">① SOURCE → MODELED DATASET</text>
+  <rect x="20" y="104" width="180" height="88" rx="10" fill="#f4f6f9" stroke="#1b2433" stroke-width="1.4"/>
+  <text x="110" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#1b2433">cases</text>
+  <text x="110" y="150" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#5b6576">{schema}.cases</text>
+  <text x="110" y="170" text-anchor="middle" font-size="11" fill="#5b6576">or synthetic (8,000 cases)</text>
+  <rect x="20" y="212" width="180" height="88" rx="10" fill="#f4f6f9" stroke="#1b2433" stroke-width="1.4"/>
+  <text x="110" y="238" text-anchor="middle" font-size="14" font-weight="700" fill="#1b2433">customers</text>
+  <text x="110" y="258" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#5b6576">{schema}.customers</text>
+  <text x="110" y="278" text-anchor="middle" font-size="11" fill="#5b6576">or synthetic (1,500)</text>
+
+  <!-- profile/join -->
+  <rect x="235" y="104" width="190" height="196" rx="10" fill="#fff" stroke="#1b2433" stroke-width="1.2"/>
+  <text x="330" y="130" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2433">SQL Editor</text>
+  <text x="330" y="152" text-anchor="middle" font-size="11.5" fill="#1b2433">profile both tables</text>
+  <text x="330" y="170" text-anchor="middle" font-size="11" fill="#5b6576">key uniqueness · orphans ·</text>
+  <text x="330" y="186" text-anchor="middle" font-size="11" fill="#5b6576">messy status values</text>
+  <text x="330" y="214" text-anchor="middle" font-size="11.5" fill="#1b2433">LEFT JOIN on</text>
+  <text x="330" y="232" text-anchor="middle" font-size="11.5" font-family="Consolas, monospace" fill="#1b2433">customer_id</text>
+  <text x="330" y="258" text-anchor="middle" font-size="11" fill="#5b6576">missing customer →</text>
+  <text x="330" y="274" text-anchor="middle" font-size="11" fill="#5b6576">segment 'Unknown'</text>
+  <line x1="200" y1="148" x2="231" y2="170" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="200" y1="256" x2="231" y2="234" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- gold + metrics -->
+  <text x="595" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#d9480f">② GOLD VIEW + CERTIFIED METRICS · UNITY CATALOG</text>
+  <rect x="455" y="104" width="280" height="196" rx="12" fill="#fdeee6" stroke="#d9480f" stroke-width="1.6"/>
+  <rect x="471" y="118" width="248" height="74" rx="8" fill="#fff" stroke="#1b2433"/>
+  <text x="595" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#1b2433">Gold view <tspan font-family="Consolas, monospace">case_customer</tspan></text>
+  <text x="595" y="160" text-anchor="middle" font-size="11" fill="#5b6576">one row per case + customer · column comments</text>
+  <text x="595" y="176" text-anchor="middle" font-size="11" fill="#5b6576">is_open · days_to_close · within_sla</text>
+  <rect x="471" y="206" width="248" height="82" rx="8" fill="#fff" stroke="#d9480f" stroke-width="1.8"/>
+  <text x="595" y="228" text-anchor="middle" font-size="13" font-weight="700" fill="#d9480f">Metric view <tspan font-family="Consolas, monospace">case_metrics</tspan></text>
+  <text x="595" y="248" text-anchor="middle" font-size="11" fill="#1b2433">total · open · avg days to close · SLA met rate</text>
+  <text x="595" y="264" text-anchor="middle" font-size="11" fill="#5b6576">defined once · synonyms · certified tag</text>
+  <text x="595" y="280" text-anchor="middle" font-size="10.5" fill="#5b6576">queried with MEASURE()</text>
+  <line x1="595" y1="192" x2="595" y2="203" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="425" y1="200" x2="451" y2="200" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- consumers -->
+  <text x="935" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#d9480f">③ AI/BI DASHBOARD</text>
+  <rect x="770" y="104" width="410" height="90" rx="10" fill="#fff" stroke="#d9480f" stroke-width="1.8"/>
+  <text x="975" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#d9480f">Case Overview dashboard · report developers</text>
+  <text x="975" y="148" text-anchor="middle" font-size="11.5" fill="#1b2433">KPI counters · monthly trend · breakdowns · certified-metrics table</text>
+  <text x="975" y="166" text-anchor="middle" font-size="11" fill="#5b6576">filters: region · segment · case type · published, shareable link</text>
+  <text x="975" y="183" text-anchor="middle" font-size="11" fill="#5b6576">no embedded credentials → each viewer's own UC permissions</text>
+  <text x="935" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#d9480f">④ GENIE</text>
+  <rect x="770" y="232" width="410" height="90" rx="10" fill="#fff" stroke="#d9480f" stroke-width="1.8"/>
+  <text x="975" y="256" text-anchor="middle" font-size="14" font-weight="700" fill="#d9480f">Genie Agent (Genie space) · business self-serve</text>
+  <text x="975" y="276" text-anchor="middle" font-size="11.5" fill="#1b2433">instructions · sample questions · example SQL on the metric view</text>
+  <text x="975" y="294" text-anchor="middle" font-size="11" fill="#5b6576">plain-language questions → same certified numbers as the dashboard</text>
+  <text x="975" y="311" text-anchor="middle" font-size="11" fill="#5b6576">or ask through Genie One</text>
+  <line x1="735" y1="180" x2="766" y2="150" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="735" y1="240" x2="766" y2="270" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- warehouse + users -->
+  <rect x="455" y="336" width="280" height="56" rx="10" fill="#f4f6f9" stroke="#1b2433" stroke-width="1.2"/>
+  <text x="595" y="360" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1b2433">Serverless SQL warehouse</text>
+  <text x="595" y="378" text-anchor="middle" font-size="11" fill="#5b6576">runs SQL Editor, dashboard and Genie queries</text>
+  <rect x="770" y="344" width="410" height="80" rx="10" fill="#f4f6f9" stroke="#1b2433" stroke-width="1.4"/>
+  <text x="975" y="368" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2433">⑥ Report developers + business users</text>
+  <text x="975" y="386" text-anchor="middle" font-size="11" fill="#1b2433">account-level Entra ID group</text>
+  <text x="975" y="401" text-anchor="middle" font-size="11" fill="#1b2433">SELECT on gold · CAN RUN dashboard · CAN RUN Genie</text>
+  <text x="975" y="416" text-anchor="middle" font-size="10.5" fill="#5b6576">source tables stay private; row filters apply per viewer</text>
+  <line x1="975" y1="344" x2="975" y2="326" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- DAB -->
+  <rect x="20" y="446" width="1160" height="82" rx="10" fill="#eef3fb" stroke="#2a5db0" stroke-width="1.4"/>
+  <text x="36" y="468" font-size="11" font-weight="700" fill="#2a5db0">⑤ DATABRICKS ASSET BUNDLE + GIT CHECK-IN</text>
+  <text x="36" y="492" font-size="12.5" fill="#1b2433" xml:space="preserve">Git repo:  <tspan font-family="Consolas, monospace">databricks.yml</tspan>  +  <tspan font-family="Consolas, monospace">resources/analytics_job.yml, case_dashboard.yml, case_genie.yml</tspan>  +  <tspan font-family="Consolas, monospace">src/</tspan>  +  <tspan font-family="Consolas, monospace">sql/</tspan>  +  <tspan font-family="Consolas, monospace">dashboards/</tspan></text>
+  <text x="36" y="514" font-size="12.5" fill="#1b2433"><tspan font-family="Consolas, monospace">bundle deploy -t dev</tspan> → pull request → CI <tspan font-family="Consolas, monospace">bundle deploy -t prod</tspan> as a service principal · one deploy builds the model, dashboard and Genie Agent</text>
+  <g stroke="#2a5db0" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#a)">
+    <line x1="595" y1="446" x2="595" y2="396"/><line x1="1150" y1="446" x2="1150" y2="428"/>
+  </g>
+
+  <!-- prerequisites -->
+  <text x="20" y="568" font-size="16" font-weight="700" fill="#1b2433">What must be available / enabled</text>
+  <rect x="20" y="582" width="370" height="290" rx="10" fill="#fff" stroke="#c9ced8"/>
+  <text x="36" y="606" font-size="12" font-weight="700" fill="#d9480f">ACCOUNT ADMIN</text>
+  <g font-size="12" fill="#1b2433">
+    <text x="36" y="630">✓ Unity Catalog metastore on the workspace</text>
+    <text x="36" y="654">✓ Partner-powered AI features — ON at</text>
+    <text x="54" y="670">account and workspace level (Genie)</text>
+    <text x="36" y="694">✓ Cross-Geo processing, if the workspace's</text>
+    <text x="54" y="710">Geo requires it (Genie)</text>
+    <text x="36" y="734">✓ Account-level Entra ID group (UC grants)</text>
+  </g>
+  <rect x="405" y="582" width="420" height="290" rx="10" fill="#fff" stroke="#c9ced8"/>
+  <text x="421" y="606" font-size="12" font-weight="700" fill="#d9480f">WORKSPACE ADMIN</text>
+  <g font-size="12" fill="#1b2433">
+    <text x="421" y="630">✓ Serverless (or pro) SQL warehouse; group CAN USE</text>
+    <text x="421" y="654">✓ Databricks SQL entitlement for report developers</text>
+    <text x="439" y="670" fill="#5b6576">(SQL Editor, dashboards, Genie authoring)</text>
+    <text x="421" y="694">✓ Consumer access or Databricks SQL for viewers</text>
+    <text x="421" y="718">✓ UC: USE CATALOG / SCHEMA + SELECT on sources;</text>
+    <text x="439" y="734" fill="#5b6576">CREATE SCHEMA (or a gold schema per attendee)</text>
+    <text x="421" y="758">✓ Serverless notebooks + jobs (guided notebook, DAB job)</text>
+    <text x="421" y="782">✓ Git folders + Git provider credentials</text>
+    <text x="421" y="806">✓ Databricks CLI or web terminal for DABs</text>
+    <text x="421" y="830">✓ Optional: ASSIGN on system.certification_status</text>
+    <text x="439" y="846" fill="#5b6576">(to tag the metric view as certified)</text>
+  </g>
+  <rect x="840" y="582" width="340" height="290" rx="10" fill="#fff8e8" stroke="#c99a2e"/>
+  <text x="856" y="606" font-size="12" font-weight="700" fill="#8a6100">GOOD TO KNOW</text>
+  <g font-size="12" fill="#1b2433">
+    <text x="856" y="630">✗ Not needed: Databricks Apps or a</text>
+    <text x="874" y="646" fill="#5b6576">separate BI tool — dashboards and</text>
+    <text x="874" y="662" fill="#5b6576">Genie are built into the workspace.</text>
+    <text x="856" y="688">€ Genie One / Genie Agents: free for users</text>
+    <text x="874" y="704" fill="#5b6576">until 31 Jan 2027 (service principals billed).</text>
+    <text x="856" y="730">⚠ The Genie Agent needs the gold view and</text>
+    <text x="874" y="746" fill="#5b6576">metric view to exist: run the build job</text>
+    <text x="874" y="762" fill="#5b6576">before the first bundle deploy of Genie.</text>
+    <text x="856" y="788">⚠ Row filters apply to tables, not views:</text>
+    <text x="874" y="804" fill="#5b6576">filter the source table that feeds the view.</text>
+  </g>
+</svg>
