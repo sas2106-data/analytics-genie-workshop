@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="Analytics workshop architecture: two source tables, cases and customers, are profiled and joined on customer_id into a documented gold view, case_customer, and a certified metric view, case_metrics, in Unity Catalog. An AI/BI dashboard for report developers and a Genie Agent for business users both read the same gold view and metric view on a serverless SQL warehouse. A Databricks Asset Bundle in Git deploys the build job, dashboard and Genie Agent. Panels list what must be enabled.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 830" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="Analytics workshop architecture: two source tables, cases and customers, are profiled and joined on customer_id into a documented gold view, case_customer, and a certified metric view, case_metrics, in Unity Catalog. An AI/BI dashboard for report developers and a Genie Agent for business users both read the same gold view and metric view on a serverless SQL warehouse. Panels list what must be enabled.">
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1b2433"/></marker>
   </defs>
-  <rect width="1200" height="900" fill="#ffffff"/>
+  <rect width="1200" height="830" fill="#ffffff"/>
   <text x="20" y="34" font-size="20" font-weight="700" fill="#1b2433">Two tables → gold view → certified metrics → dashboard + Genie · workshop architecture</text>
   <text x="20" y="56" font-size="13" fill="#5b6576">One governed dataset, two consumption surfaces. A developer's chart and a business user's question return the same numbers.</text>
 
@@ -66,60 +66,51 @@
   <text x="595" y="360" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1b2433">Serverless SQL warehouse</text>
   <text x="595" y="378" text-anchor="middle" font-size="11" fill="#5b6576">runs SQL Editor, dashboard and Genie queries</text>
   <rect x="770" y="344" width="410" height="80" rx="10" fill="#f4f6f9" stroke="#1b2433" stroke-width="1.4"/>
-  <text x="975" y="368" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2433">⑥ Report developers + business users</text>
+  <text x="975" y="368" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2433">⑤ Report developers + business users</text>
   <text x="975" y="386" text-anchor="middle" font-size="11" fill="#1b2433">account-level Entra ID group</text>
   <text x="975" y="401" text-anchor="middle" font-size="11" fill="#1b2433">SELECT on gold · CAN RUN dashboard · CAN RUN Genie</text>
   <text x="975" y="416" text-anchor="middle" font-size="10.5" fill="#5b6576">source tables stay private; row filters apply per viewer</text>
   <line x1="975" y1="344" x2="975" y2="326" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
 
-  <!-- DAB -->
-  <rect x="20" y="446" width="1160" height="82" rx="10" fill="#eef3fb" stroke="#2a5db0" stroke-width="1.4"/>
-  <text x="36" y="468" font-size="11" font-weight="700" fill="#2a5db0">⑤ DATABRICKS ASSET BUNDLE + GIT CHECK-IN</text>
-  <text x="36" y="492" font-size="12.5" fill="#1b2433" xml:space="preserve">Git repo:  <tspan font-family="Consolas, monospace">databricks.yml</tspan>  +  <tspan font-family="Consolas, monospace">resources/analytics_job.yml, case_dashboard.yml, case_genie.yml</tspan>  +  <tspan font-family="Consolas, monospace">src/</tspan>  +  <tspan font-family="Consolas, monospace">sql/</tspan>  +  <tspan font-family="Consolas, monospace">dashboards/</tspan></text>
-  <text x="36" y="514" font-size="12.5" fill="#1b2433"><tspan font-family="Consolas, monospace">bundle deploy -t dev</tspan> → pull request → CI <tspan font-family="Consolas, monospace">bundle deploy -t prod</tspan> as a service principal · one deploy builds the model, dashboard and Genie Agent</text>
-  <g stroke="#2a5db0" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#a)">
-    <line x1="595" y1="446" x2="595" y2="396"/><line x1="1150" y1="446" x2="1150" y2="428"/>
-  </g>
 
   <!-- prerequisites -->
-  <text x="20" y="568" font-size="16" font-weight="700" fill="#1b2433">What must be available / enabled</text>
-  <rect x="20" y="582" width="370" height="290" rx="10" fill="#fff" stroke="#c9ced8"/>
-  <text x="36" y="606" font-size="12" font-weight="700" fill="#d9480f">ACCOUNT ADMIN</text>
+  <text x="20" y="498" font-size="16" font-weight="700" fill="#1b2433">What must be available / enabled</text>
+  <rect x="20" y="512" width="370" height="270" rx="10" fill="#fff" stroke="#c9ced8"/>
+  <text x="36" y="536" font-size="12" font-weight="700" fill="#d9480f">ACCOUNT ADMIN</text>
   <g font-size="12" fill="#1b2433">
-    <text x="36" y="630">✓ Unity Catalog metastore on the workspace</text>
-    <text x="36" y="654">✓ Partner-powered AI features — ON at</text>
-    <text x="54" y="670">account and workspace level (Genie)</text>
-    <text x="36" y="694">✓ Cross-Geo processing, if the workspace's</text>
-    <text x="54" y="710">Geo requires it (Genie)</text>
-    <text x="36" y="734">✓ Account-level Entra ID group (UC grants)</text>
+    <text x="36" y="560">✓ Unity Catalog metastore on the workspace</text>
+    <text x="36" y="584">✓ Partner-powered AI features — ON at</text>
+    <text x="54" y="600">account and workspace level (Genie)</text>
+    <text x="36" y="624">✓ Cross-Geo processing, if the workspace's</text>
+    <text x="54" y="640">Geo requires it (Genie)</text>
+    <text x="36" y="664">✓ Account-level Entra ID group (UC grants)</text>
   </g>
-  <rect x="405" y="582" width="420" height="290" rx="10" fill="#fff" stroke="#c9ced8"/>
-  <text x="421" y="606" font-size="12" font-weight="700" fill="#d9480f">WORKSPACE ADMIN</text>
+  <rect x="405" y="512" width="420" height="270" rx="10" fill="#fff" stroke="#c9ced8"/>
+  <text x="421" y="536" font-size="12" font-weight="700" fill="#d9480f">WORKSPACE ADMIN</text>
   <g font-size="12" fill="#1b2433">
-    <text x="421" y="630">✓ Serverless (or pro) SQL warehouse; group CAN USE</text>
-    <text x="421" y="654">✓ Databricks SQL entitlement for report developers</text>
-    <text x="439" y="670" fill="#5b6576">(SQL Editor, dashboards, Genie authoring)</text>
-    <text x="421" y="694">✓ Consumer access or Databricks SQL for viewers</text>
-    <text x="421" y="718">✓ UC: USE CATALOG / SCHEMA + SELECT on sources;</text>
-    <text x="439" y="734" fill="#5b6576">CREATE SCHEMA (or a gold schema per attendee)</text>
-    <text x="421" y="758">✓ Serverless notebooks + jobs (guided notebook, DAB job)</text>
-    <text x="421" y="782">✓ Git folders + Git provider credentials</text>
-    <text x="421" y="806">✓ Databricks CLI or web terminal for DABs</text>
-    <text x="421" y="830">✓ Optional: ASSIGN on system.certification_status</text>
-    <text x="439" y="846" fill="#5b6576">(to tag the metric view as certified)</text>
+    <text x="421" y="560">✓ Serverless (or pro) SQL warehouse; group CAN USE</text>
+    <text x="421" y="584">✓ Databricks SQL entitlement for report developers</text>
+    <text x="439" y="600" fill="#5b6576">(SQL Editor, dashboards, Genie authoring)</text>
+    <text x="421" y="624">✓ Consumer access or Databricks SQL for viewers</text>
+    <text x="421" y="648">✓ UC: USE CATALOG / SCHEMA + SELECT on sources;</text>
+    <text x="439" y="664" fill="#5b6576">CREATE SCHEMA (or a gold schema per attendee)</text>
+    <text x="421" y="688">✓ Serverless notebooks (guided notebook)</text>
+    <text x="421" y="712">✓ Git folders + Git provider credentials</text>
+    <text x="421" y="736">✓ Optional: ASSIGN on system.certification_status</text>
+    <text x="439" y="752" fill="#5b6576">(to tag the metric view as certified)</text>
   </g>
-  <rect x="840" y="582" width="340" height="290" rx="10" fill="#fff8e8" stroke="#c99a2e"/>
-  <text x="856" y="606" font-size="12" font-weight="700" fill="#8a6100">GOOD TO KNOW</text>
+  <rect x="840" y="512" width="340" height="270" rx="10" fill="#fff8e8" stroke="#c99a2e"/>
+  <text x="856" y="536" font-size="12" font-weight="700" fill="#8a6100">GOOD TO KNOW</text>
   <g font-size="12" fill="#1b2433">
-    <text x="856" y="630">✗ Not needed: Databricks Apps or a</text>
-    <text x="874" y="646" fill="#5b6576">separate BI tool — dashboards and</text>
-    <text x="874" y="662" fill="#5b6576">Genie are built into the workspace.</text>
-    <text x="856" y="688">€ Genie One / Genie Agents: free for users</text>
-    <text x="874" y="704" fill="#5b6576">until 31 Jan 2027 (service principals billed).</text>
-    <text x="856" y="730">⚠ The Genie Agent needs the gold view and</text>
-    <text x="874" y="746" fill="#5b6576">metric view to exist: run the build job</text>
-    <text x="874" y="762" fill="#5b6576">before the first bundle deploy of Genie.</text>
-    <text x="856" y="788">⚠ Row filters apply to tables, not views:</text>
-    <text x="874" y="804" fill="#5b6576">filter the source table that feeds the view.</text>
+    <text x="856" y="560">✗ Not needed: Databricks Apps or a</text>
+    <text x="874" y="576" fill="#5b6576">separate BI tool — dashboards and</text>
+    <text x="874" y="592" fill="#5b6576">Genie are built into the workspace.</text>
+    <text x="856" y="618">€ Genie One / Genie Agents: free for users</text>
+    <text x="874" y="634" fill="#5b6576">until 31 Jan 2027 (service principals billed).</text>
+    <text x="856" y="660">⚠ Build the gold view and metric view</text>
+    <text x="874" y="676" fill="#5b6576">(Module 2) before creating the dashboard</text>
+    <text x="874" y="692" fill="#5b6576">and the Genie Agent.</text>
+    <text x="856" y="718">⚠ Row filters apply to tables, not views:</text>
+    <text x="874" y="734" fill="#5b6576">filter the source table that feeds the view.</text>
   </g>
 </svg>

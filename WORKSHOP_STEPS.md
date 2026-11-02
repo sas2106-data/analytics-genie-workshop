@@ -7,8 +7,7 @@ The flow:
 - **② Gold view + certified metrics:** a documented view, plus a metric view.
 - **③ AI/BI dashboard** for report developers.
 - **④ Genie Agent** for business self-serve, on the same data.
-- **⑤ DAB + Git check-in.**
-- **⑥ Governance, sharing and access control.**
+- **⑤ Governance, sharing and access control.**
 
 ![Architecture](docs/architecture.png)
 
@@ -18,10 +17,10 @@ The flow:
 |---|---|
 | `sql/01_profile_and_join.sql` | Module 1, for the SQL Editor: profiling queries and the join |
 | `sql/02_gold_view.sql`, `sql/03_metric_view.sql` | Module 2, for the SQL Editor: the gold view `case_customer` and the metric view `case_metrics` |
-| `src/00_setup.py` … `02_metric_view.py` | The same steps as notebooks, run by the build job (`setup` can also create synthetic data) |
+| `src/00_setup.py` … `02_metric_view.py` | The same steps as notebooks, run by the guided notebook (`setup` can also create synthetic data) |
 | `dashboards/case_overview.lvdash.json` | Module 3: the *Case Overview* AI/BI dashboard (answer key) |
-| `databricks.yml` + `resources/*.yml` | Module 5: the bundle, containing the build job `analytics_build`, the dashboard `case_overview` and the Genie Agent `case_genie` |
-| `notebooks/Workshop_Steps.py` | **Executable guide.** Runs modules 1, 2, 3, 4 and 6 in code. Use it for dry runs or as the answer key |
+| `genie/instructions.md` | Module 4: table descriptions, text instructions, example SQL and sample questions for the Genie Agent |
+| `notebooks/Workshop_Steps.py` | **Executable guide.** Runs modules 1 to 5 in code. Use it for dry runs or as the answer key |
 
 ---
 
@@ -44,7 +43,6 @@ The flow:
    - `CREATE SCHEMA` on the catalog, or pre-create a gold schema per attendee.
 8. **Optional:** grant `ASSIGN` on the `system.certification_status` governed tag, so attendees can mark the metric view as certified.
 9. Make this repo available in your Git provider. Attendees clone it as a **Git folder** and need Git credentials set under **Settings → Linked accounts**.
-10. Decide how attendees run the Databricks CLI for Module 5: on a laptop, or in the workspace **web terminal**.
 
 > **Not needed:** Databricks Apps, or any separate BI tool. AI/BI dashboards and Genie are built into the workspace.
 
@@ -71,12 +69,11 @@ Introductions and goals for the day. Check that everyone can log in, open the **
 
 | Platform area | What it does | Today |
 |---|---|---|
-| **Unity Catalog** | One governance layer: grants, row filters, column masks, lineage, audit, certified assets | Modules 2 and 6 |
+| **Unity Catalog** | One governance layer: grants, row filters, column masks, lineage, audit, certified assets | Modules 2 and 5 |
 | **Metric views** | Business measures defined once in Unity Catalog and reused by dashboards, Genie and SQL | Module 2 |
 | **Databricks SQL** | Serverless SQL warehouses and the SQL Editor | Modules 1 and 2 |
 | **AI/BI dashboards** | Governed, shareable dashboards built into the workspace | Module 3 |
 | **Genie** | Natural-language questions over governed data (Genie Agents and Genie One) | Module 4 |
-| **Asset Bundles & Git folders** | Infrastructure as code and CI/CD for the dashboard, Genie Agent and jobs | Module 5 |
 
 End on the architecture diagram: one dataset, two surfaces.
 
@@ -118,12 +115,12 @@ End on the architecture diagram: one dataset, two surfaces.
 
 ## 1:20 · Break (15 min)
 
-## 1:35 · Module 3 — Build the AI/BI dashboard (45 min)
+## 1:35 · Module 3 — Build the AI/BI dashboard (50 min)
 
 1. Go to **Dashboards → Create dashboard** and open the **Data** tab. Add two datasets:
    - **Cases (gold view):** an SQL dataset that selects `case_id, opened_month, case_type, channel, priority, segment, region, is_open, days_to_close, within_sla` from `case_customer`. This dataset powers the interactive visuals and filters.
    - **Certified metrics:** choose **Add data → `case_metrics`** to use the metric view directly. Or use SQL with `MEASURE()` grouped by `segment, region`.
-2. On the **Canvas**, build the visuals. `dashboards/case_overview.lvdash.json` is the answer key.
+2. On the **Canvas**, build the visuals. `dashboards/case_overview.lvdash.json` is the answer key: import it with **Dashboards → Create → Import dashboard from file**, then set each dataset's catalog and schema to your gold schema in the **Data** tab.
 
    | Visual | Field or measure |
    |---|---|
@@ -145,10 +142,10 @@ End on the architecture diagram: one dataset, two surfaces.
    - Copy the link.
 6. **Check:** with no filters, the counters must match the certified table's totals. *Same numbers, one definition.*
 
-## 2:20 · Module 4 — Create the Genie Agent (35 min)
+## 2:25 · Module 4 — Create the Genie Agent (35 min)
 
 1. Go to **Genie → New**, add `case_customer` and `case_metrics`, and choose the serverless warehouse.
-2. Under **Instructions**, paste the text instructions from `resources/case_genie.yml`:
+2. Under **Instructions**, paste the text instructions from `genie/instructions.md`:
    - prefer the metric view, using `MEASURE()`;
    - define *open*, *SLA* and *days to close*;
    - explain the `Unknown` segment;
@@ -160,56 +157,15 @@ End on the architecture diagram: one dataset, two surfaces.
    - *Which channel takes longest to close?*, then follow up with *…and for VIP customers only?*
 5. In **Monitor**, look at the questions asked and the SQL that was generated. Turn a good answer into a new example query.
 
-## 2:55 · Break (10 min)
+## 3:00 · Break (10 min)
 
-## 3:05 · Module 5 — Create the DAB and check it in (10 min)
+## 3:10 · Module 5 — Governance, sharing & access control (20 min)
 
-**1 · Capture the UI-built objects as YAML**
-
-Compare each generated file with `resources/*.yml`, then delete the generated ones.
-
-```bash
-databricks bundle generate dashboard   --existing-id <dashboard id>
-databricks bundle generate genie-space --existing-id <space id>
-```
-
-**2 · Set the variables once per terminal**
-
-This form works in bash and zsh.
-
-```bash
-export BUNDLE_VAR_catalog=<catalog>
-export BUNDLE_VAR_schema=<source schema>
-export BUNDLE_VAR_target_schema=<gold schema>_dab
-export BUNDLE_VAR_warehouse_id=<warehouse id>
-export BUNDLE_VAR_group_name=workshop-users
-```
-
-**3 · Deploy, build and check in**
-
-```bash
-databricks bundle validate -t dev
-databricks bundle deploy   -t dev                 # creates the build job and the dashboard
-databricks bundle run analytics_build -t dev      # builds the gold view and metric view
-databricks bundle deploy   -t dev                 # now creates the Genie Agent (its tables exist)
-
-git checkout -b feature/<you>-case-analytics
-git add -A && git commit -m "Case dashboard and Genie Agent as a bundle"
-git push -u origin HEAD                           # then open a pull request
-```
-
-What to point out:
-- `dataset_catalog` and `dataset_schema` in `resources/case_dashboard.yml` point the dashboard's unqualified table names at each environment's gold schema. **The same dashboard file works in dev and prod.**
-- Dev mode prefixes the dashboard and Genie names with `[dev <you>]`.
-- **Promotion:** CI runs `bundle deploy -t prod` as a service principal after the pull request merges.
-
-## 3:15 · Module 6 — Governance, sharing & access control (15 min)
-
-| Layer | Grant | Where (bundle) |
+| Layer | Grant | Where |
 |---|---|---|
 | Data | `USE CATALOG` and `USE SCHEMA`, plus `SELECT` on the **gold** schema | Catalog Explorer → Permissions, or `GRANT …` |
-| Dashboard | **Can run** (published) | Dashboard → Share (`resources/case_dashboard.yml`) |
-| Genie Agent | **Can run** | Genie → Share (`resources/case_genie.yml`) |
+| Dashboard | **Can run** (published) | Dashboard → Share |
+| Genie Agent | **Can run** | Genie → Share |
 
 ```sql
 GRANT USE CATALOG ON CATALOG <catalog> TO `workshop-users`;
@@ -228,9 +184,9 @@ Discussion points:
   ```
   Group members now see only Web and Phone cases in both the dashboard and Genie. Remove the filter with `ALTER TABLE … DROP ROW FILTER;`.
 
-Wrap up: one governed dataset, two surfaces, one set of numbers, deployed as code.
+Wrap up: one governed dataset, two surfaces, one set of numbers.
 
-**Clean up:** run `databricks bundle destroy -t dev`, then run the notebook's last cell with `cleanup = yes`.
+**Clean up:** run the notebook's last cell with `cleanup = yes`.
 
 ---
 
@@ -241,8 +197,6 @@ Wrap up: one governed dataset, two surfaces, one set of numbers, deployed as cod
 | `MEASURE` errors such as *cannot resolve* | Every measure from a metric view must be wrapped in `MEASURE(<name>)`. Dimensions are not. |
 | The join returns more rows than `cases` | `customer_id` isn't unique in `customers`. Run profiling query 2 and deduplicate first. |
 | Dashboard viewers see *Permission denied* | Embed credentials is off, so grant the viewer `SELECT` on the gold schema, or turn embedding on. |
-| `bundle deploy`: *Failed to fetch tables for the agent* | The gold view or metric view doesn't exist yet. Run `bundle run analytics_build`, then deploy again. |
-| `bundle validate`: *no value assigned to required variable* | Export `BUNDLE_VAR_schema`, `BUNDLE_VAR_target_schema` and `BUNDLE_VAR_warehouse_id`. In zsh, `V="--var=…"; … $V` silently passes nothing. |
 | The Genie sidebar icon shows but Genie won't open | Partner-powered AI features are off (account admin). |
 | `GRANT … TO workshop-users` fails with *PRINCIPAL_DOES_NOT_EXIST* | The group is workspace-local. Use an account-level group. |
 | `SET TAGS ('system.certification_status' …)` is denied | You need `ASSIGN` on that governed tag. Skip it, or ask an admin. |

@@ -4,7 +4,6 @@
 # MAGIC
 # MAGIC Run top to bottom on **serverless** compute from the workshop Git folder. Each module does in code what the
 # MAGIC facilitator shows in the UI (SQL Editor, dashboard editor, Genie), so attendees can catch up or re-run any step.
-# MAGIC Module 5 (DABs + Git check-in) runs from a terminal — see `WORKSHOP_STEPS.md`.
 # MAGIC
 # MAGIC | Module | What this notebook does |
 # MAGIC |---|---|
@@ -12,7 +11,7 @@
 # MAGIC | 2 · Gold view + certified metrics | Creates the documented gold view `case_customer` and the metric view `case_metrics` |
 # MAGIC | 3 · AI/BI dashboard | Creates and publishes the *Case Overview* dashboard from `dashboards/case_overview.lvdash.json` |
 # MAGIC | 4 · Genie | Creates a Genie Agent (Genie space) on the gold view and metric view, and asks it a question |
-# MAGIC | 6 · Governance & sharing | Unity Catalog grants, dashboard `CAN RUN`, Genie `CAN RUN` for a group |
+# MAGIC | 5 · Governance & sharing | Unity Catalog grants, dashboard `CAN RUN`, Genie `CAN RUN` for a group |
 # MAGIC
 # MAGIC Every resource gets your user name as a suffix, so attendees don't collide.
 
@@ -198,25 +197,7 @@ for att in msg.attachments or []:
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Module 5 · DABs + Git check-in (terminal)
-# MAGIC The bundle (`databricks.yml` + `resources/*.yml`) declares the same build job, dashboard and Genie Agent:
-# MAGIC ```bash
-# MAGIC export BUNDLE_VAR_catalog=<catalog> BUNDLE_VAR_schema=<source schema> BUNDLE_VAR_target_schema=<gold schema>
-# MAGIC export BUNDLE_VAR_warehouse_id=<id> BUNDLE_VAR_group_name=<group>
-# MAGIC databricks bundle validate -t dev && databricks bundle deploy -t dev
-# MAGIC databricks bundle run analytics_build -t dev && databricks bundle deploy -t dev
-# MAGIC git checkout -b feature/<you> && git add -A && git commit -m "Case dashboard + Genie" && git push -u origin HEAD
-# MAGIC ```
-
-# COMMAND ----------
-
-print(f"databricks bundle generate dashboard --existing-id {dashboard_id}\n"
-      f"databricks bundle generate genie-space --existing-id {space_id}")
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## Module 6 · Governance, sharing & access control
+# MAGIC ## Module 5 · Governance, sharing & access control
 # MAGIC | Layer | Grant | Why |
 # MAGIC |---|---|---|
 # MAGIC | Data (Unity Catalog) | `USE CATALOG`, `USE SCHEMA`, `SELECT` on the gold schema | The dashboard (no embedded credentials) and Genie both query as the viewer |
