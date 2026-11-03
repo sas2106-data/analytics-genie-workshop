@@ -21,10 +21,8 @@ once you have one you like.
 | `pipeline/policy_layers.sql` | Module 1: the Lakeflow pipeline, ruby `policy_ruby` (union) and diamond `policy_diamond` (5 columns) |
 | `sql/01_explore_sources.sql` | Module 1: a quick look at the two sources in the SQL Editor |
 | `sql/02_metric_view.sql` | Module 2: the certified metric view `policy_metrics` |
-| `src/00_setup.py`, `src/01_metric_view.py` | The same steps as notebooks, run by the guided notebook (`setup` can also create synthetic data) |
-| `dashboards/policy_overview.lvdash.json` | Module 3: the *Policy Overview* AI/BI dashboard (answer key) |
-| `genie/instructions.md` | Module 4: table descriptions, text instructions, example SQL and sample questions for the Genie Agent |
-| `notebooks/Workshop_Steps.py` | **Executable guide.** Runs modules 1 to 5 in code. Use it for dry runs or as the answer key |
+| `notebooks/00_Setup` … `05_Governance` | **One step-by-step notebook per module**, with a catch-up cell per step |
+| `notebooks/06_Cleanup`, `notebooks/Run_All` | Delete your resources; run every module in order (facilitator dry run) |
 
 ---
 
@@ -58,10 +56,10 @@ once you have one you like.
 - **No data yet?** Set `create_sample_data = true`. The setup step creates about 3,000 annuity and 5,000 life policies, with inconsistent status spellings and a few rows with no policy number.
 
 **Dry run (facilitator)**
-1. Open `notebooks/Workshop_Steps` and set the widgets: the source catalog, schema and tables; the target catalog and schema; `warehouse_id` and `group_name`.
+1. Open `notebooks/Run_All` and set the widgets: the source catalog, schema and tables; the target catalog and schema; `warehouse_id` and `group_name`.
 2. Click **Run all**. It takes about 10 minutes and ends with links to the pipeline, dashboard and Genie Agent.
 3. Open the dashboard and the Genie Agent and check that they agree, for example on in-force policies by product line.
-4. Set `cleanup = yes` and run the last cell.
+4. Run `notebooks/06_Cleanup` with *Confirm delete* = `yes`.
 
 ---
 
@@ -84,6 +82,8 @@ End on the architecture diagram: **source → ruby → diamond**, then one diamo
 
 ## 0:15 · Module 1 — Layered architecture & the pipeline (30 min)
 
+**Notebook:** `notebooks/01_Layered_Pipeline` walks through these steps, with a catch-up cell for each.
+
 | Layer | Table | What it's for |
 |---|---|---|
 | Source | `annuity_policy`, `life_policy` | Already sourced. Left as they are |
@@ -104,6 +104,8 @@ End on the architecture diagram: **source → ruby → diamond**, then one diamo
 6. **Schedule it:** **Schedule → Add schedule** (e.g. daily). Everything downstream (metric view, dashboard, Genie) reads the latest diamond data with no changes.
 
 ## 0:45 · Module 2 — What happens after you've built a table you like (35 min)
+
+**Notebook:** `notebooks/02_After_the_Table` walks through these steps, with a catch-up cell for each.
 
 1. **Catalog Explorer → `policy_diamond`:**
    - **Overview:** the table and column comments come from the pipeline SQL. Use **AI-generated** descriptions where they're missing;
@@ -134,6 +136,8 @@ End on the architecture diagram: **source → ruby → diamond**, then one diamo
 
 ## 1:35 · Module 3 — Build the AI/BI dashboard (50 min)
 
+**Notebook:** `notebooks/03_AIBI_Dashboard` walks through these steps, with a catch-up cell for each.
+
 1. Go to **Dashboards → Create dashboard** and open the **Data** tab. Add two datasets:
    - **Policies (diamond):** an SQL dataset that selects the 5 diamond columns, plus `issue_month` and an `is_in_force` flag, from `policy_diamond`. This dataset powers the interactive visuals and filters.
    - **Certified metrics:** choose **Add data → `policy_metrics`** to use the metric view directly. Or use SQL with `MEASURE()` grouped by `product_line, policy_status`.
@@ -161,6 +165,8 @@ End on the architecture diagram: **source → ruby → diamond**, then one diamo
 
 ## 2:25 · Module 4 — Create the Genie Agent (35 min)
 
+**Notebook:** `notebooks/04_Genie_Agent` walks through these steps, with a catch-up cell for each.
+
 1. Go to **Genie → New**, add `policy_diamond` and `policy_metrics`, and choose the serverless warehouse.
 2. Under **Instructions**, paste the text instructions from `genie/instructions.md`:
    - prefer the metric view, using `MEASURE()`;
@@ -176,6 +182,8 @@ End on the architecture diagram: **source → ruby → diamond**, then one diamo
 ## 3:00 · Break (10 min)
 
 ## 3:10 · Module 5 — Governance, sharing & access control (20 min)
+
+**Notebook:** `notebooks/05_Governance` walks through these steps, with a catch-up cell for each.
 
 | Layer | Grant | Where |
 |---|---|---|
@@ -211,7 +219,7 @@ Discussion points:
 
 Wrap up: two sources, two layers, one governed table, two surfaces, one set of numbers.
 
-**Clean up:** run the notebook's last cell with `cleanup = yes`.
+**Clean up:** run `notebooks/06_Cleanup` with *Confirm delete* = `yes`.
 
 ---
 

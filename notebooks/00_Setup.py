@@ -1,39 +1,55 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # 00 · Setup
-# MAGIC Checks that the two source tables (**annuity_policy** and **life_policy**) exist in `source_catalog.source_schema`,
-# MAGIC and creates the target schema for the ruby and diamond tables. If `create_sample_data=true` and a source table is
-# MAGIC missing, it creates synthetic data: ~3,000 annuity policies and ~5,000 life policies, with inconsistent status values
-# MAGIC and a few rows without a policy number, so the pipeline's standardisation and expectations have something to do.
+# MAGIC # 00 · Setup (5 min, before Module 1)
+# MAGIC
+# MAGIC **Goal:** check that the two source tables exist, and create your own schema for the ruby and diamond tables.
+# MAGIC
+# MAGIC **Before you start:** attach this notebook to **Serverless** compute (top right).
+# MAGIC
+# MAGIC | Step | What you do |
+# MAGIC |---|---|
+# MAGIC | 1 | Set the widgets at the top: where the source tables are, and (optionally) your target catalog |
+# MAGIC | 2 | Run the cells below, top to bottom |
+# MAGIC | 3 | Note your **target schema**. You'll use it in every module |
+# MAGIC
+# MAGIC No source tables yet? Set **Synthetic data if missing** to `true`. It creates ~3,000 annuity and ~5,000 life policies
+# MAGIC with inconsistent status values and a few rows without a policy number.
 
 # COMMAND ----------
 
-dbutils.widgets.text("source_catalog", "main")
-dbutils.widgets.text("source_schema", "policy_src")
-dbutils.widgets.text("annuity_table", "annuity_policy")
-dbutils.widgets.text("life_table", "life_policy")
-dbutils.widgets.text("target_catalog", "")            # blank = same as source_catalog
-dbutils.widgets.text("target_schema", "policy_layers")
-dbutils.widgets.dropdown("create_sample_data", "false", ["false", "true"])
+# MAGIC %run ./_config
 
-src_catalog = dbutils.widgets.get("source_catalog")
-src_schema = dbutils.widgets.get("source_schema")
-tgt_catalog = dbutils.widgets.get("target_catalog").strip() or src_catalog
-tgt_schema = dbutils.widgets.get("target_schema").strip()
-annuity = f"`{src_catalog}`.`{src_schema}`.`{dbutils.widgets.get('annuity_table')}`"
-life = f"`{src_catalog}`.`{src_schema}`.`{dbutils.widgets.get('life_table')}`"
+# COMMAND ----------
+
+dbutils.widgets.dropdown("create_sample_data", "false", ["false", "true"], "9 · Synthetic data if missing")
 sample = dbutils.widgets.get("create_sample_data") == "true"
 
-spark.sql(f"CREATE SCHEMA IF NOT EXISTS `{tgt_catalog}`.`{tgt_schema}`")
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Step 1 · Create your target schema
+# MAGIC The pipeline in Module 1 writes `policy_ruby` and `policy_diamond` here. If you can't create schemas, ask the
+# MAGIC facilitator for a pre-created one and type it into the **Target schema** widget.
+
+# COMMAND ----------
+
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS {tgt} COMMENT 'Workshop: ruby and diamond policy tables'")
+print(f"Target schema ready: {target_catalog}.{target_schema}")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Step 2 · Check the source tables (or create synthetic ones)
 
 # COMMAND ----------
 
 def ensure(table, select_sql, comment, column_comments):
     if spark.catalog.tableExists(table.replace("`", "")):
+        print(f"Found {table}")
         return
     if not sample:
-        raise ValueError(f"{table} not found. Pass the right catalog/schema/table names, or set create_sample_data=true.")
-    spark.sql(f"CREATE SCHEMA IF NOT EXISTS `{src_catalog}`.`{src_schema}`")
+        raise ValueError(f"{table} not found. Fix the source widgets, or set 'Synthetic data if missing' to true.")
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS `{source_catalog}`.`{source_schema}`")
     spark.sql(f"CREATE TABLE {table} COMMENT '{comment}' AS {select_sql}")
     for col, text in column_comments.items():
         spark.sql(f"ALTER TABLE {table} ALTER COLUMN {col} COMMENT '{text}'")
@@ -82,5 +98,14 @@ ensure(life, f"""
    "issue_date": "Policy issue date", "issue_state": "US state the policy was issued in",
    "annual_premium": "Annualised planned premium, USD", "distribution_channel": "How the policy was sold"})
 
-for t in (annuity, life):
-    print(f"{t}: {spark.table(t.replace('`', '')).count()} rows")
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Step 3 · Confirm
+
+# COMMAND ----------
+
+display(spark.sql(f"""
+  SELECT '{annuity_table}' AS source_table, count(*) AS rows FROM {annuity}
+  UNION ALL SELECT '{life_table}', count(*) FROM {life}"""))
+print(f"✅ Setup done. Your target schema is {target_catalog}.{target_schema}. Next: 01_Layered_Pipeline")

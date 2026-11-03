@@ -22,10 +22,9 @@ The steps:
 | `pipeline/policy_layers.sql` | **The pipeline**: ruby (`policy_ruby`, the union) and diamond (`policy_diamond`, 5 columns), with column comments and expectations |
 | `sql/01_explore_sources.sql` | A 5-minute look at the two sources in the SQL Editor: different column names, raw status values |
 | `sql/02_metric_view.sql` | The certified metric view `policy_metrics` on the diamond table |
-| `src/00_setup.py`, `src/01_metric_view.py` | The same steps as notebooks, run by the guided notebook; `setup` can also create synthetic source tables |
-| `dashboards/policy_overview.lvdash.json` | The *Policy Overview* AI/BI dashboard: KPI counters, trend, breakdowns, a certified-metrics table, and filters (answer key) |
-| `genie/instructions.md` | Genie Agent setup: table descriptions, text instructions, example SQL and sample questions |
-| `notebooks/Workshop_Steps.py` | **Executable guide**: creates and runs the pipeline, builds the metric view, creates and publishes the dashboard, creates the Genie Agent, and applies grants |
+| `notebooks/00_Setup` … `05_Governance` | **One step-by-step notebook per module**: numbered steps for the UI, the SQL to paste, and a catch-up cell that does the step in code |
+| `notebooks/06_Cleanup`, `notebooks/Run_All` | Delete your resources; run every module in order (facilitator dry run) |
+| `notebooks/_config` | Shared settings (source/target tables, warehouse, group), loaded by every module notebook |
 | `WORKSHOP_STEPS.md` | **Step-by-step execution guide**: admin prerequisites, UI steps per module, commands, troubleshooting |
 | `docs/architecture.svg` / `.png` | The architecture, plus what must be enabled |
 
@@ -53,17 +52,31 @@ The steps:
 
 ## Quick start
 
-1. In the workspace, create a **Git folder** from this repo.
-2. Open `notebooks/Workshop_Steps` and set the widgets:
+1. In the workspace, create a **Git folder** from this repo, and attach notebooks to **Serverless** compute.
+2. Open `notebooks/00_Setup` and set the widgets:
    - `source_catalog`, `source_schema`, `annuity_table`, `life_table`: where the two source tables are;
    - `target_catalog` / `target_schema`: where ruby and diamond are written (defaults to `policy_layers_<you>`);
    - `warehouse_id` and `group_name`.
 
    If you have no data yet, set *Synthetic data if missing* to `true`.
-3. Click **Run all**. About 10 minutes later you have the pipeline, ruby and diamond tables, the metric view, a
-   published dashboard, a Genie Agent and the grants.
+3. Work through the module notebooks in order:
 
-To build it by hand instead, follow `WORKSHOP_STEPS.md`.
+   | Notebook | Module |
+   |---|---|
+   | `00_Setup` | Check the sources, create your schema |
+   | `01_Layered_Pipeline` | Look at the sources, build and run the ruby → diamond pipeline, schedule it |
+   | `02_After_the_Table` | Documentation, lineage, data quality, the certified metric view |
+   | `03_AIBI_Dashboard` | Build, publish and share the *Policy Overview* dashboard |
+   | `04_Genie_Agent` | Create the Genie Agent, ask questions, monitor |
+   | `05_Governance` | Diamond-only grants, sharing, embedded credentials, row-filter demo |
+   | `06_Cleanup` | Delete your resources |
+
+   Each step says what to do in the UI. If you fall behind, run that step's **catch-up cell**.
+
+**Facilitator dry run:** open `notebooks/Run_All`, set the same widgets, and **Run all**. About 10 minutes later you have the
+pipeline, ruby and diamond tables, the metric view, a published dashboard, a Genie Agent and the grants.
+
+`WORKSHOP_STEPS.md` has the same steps as one document, with admin prerequisites and troubleshooting.
 
 **Your own tables:** only the two `SELECT`s in `policy_ruby` (`pipeline/policy_layers.sql`) change. Map each source
 column to the ruby column names (`policy_number`, `customer_id`, `product_name`, `policy_status`, `issue_date`,
