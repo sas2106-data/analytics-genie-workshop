@@ -1,56 +1,58 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 830" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="Analytics workshop architecture: two source tables, cases and customers, are profiled and joined on customer_id into a documented gold view, case_customer, and a certified metric view, case_metrics, in Unity Catalog. An AI/BI dashboard for report developers and a Genie Agent for business users both read the same gold view and metric view on a serverless SQL warehouse. Panels list what must be enabled.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 830" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="Analytics workshop architecture: two already-sourced tables, annuity_policy and life_policy, are unioned by a Lakeflow pipeline into the ruby table policy_ruby, then pared down to five columns in the diamond table policy_diamond. Catalog Explorer shows lineage, documentation and data quality, and a certified metric view, policy_metrics, sits on the diamond table. An AI/BI dashboard and a Genie Agent both read the diamond table and metric view on a serverless SQL warehouse. Panels list what must be enabled.">
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1b2433"/></marker>
   </defs>
   <rect width="1200" height="830" fill="#ffffff"/>
-  <text x="20" y="34" font-size="20" font-weight="700" fill="#1b2433">Two tables → gold view → certified metrics → dashboard + Genie · workshop architecture</text>
-  <text x="20" y="56" font-size="13" fill="#5b6576">One governed dataset, two consumption surfaces. A developer's chart and a business user's question return the same numbers.</text>
+  <text x="20" y="34" font-size="20" font-weight="700" fill="#1b2433">Two tables → ruby → diamond → certified metrics → dashboard + Genie · workshop architecture</text>
+  <text x="20" y="56" font-size="13" fill="#5b6576">A layered pipeline builds one reporting-ready table; two surfaces read it. A developer's chart and a business user's question return the same numbers.</text>
 
   <!-- sources -->
-  <text x="110" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#d9480f">① SOURCE → MODELED DATASET</text>
-  <rect x="20" y="104" width="180" height="88" rx="10" fill="#f4f6f9" stroke="#1b2433" stroke-width="1.4"/>
-  <text x="110" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#1b2433">cases</text>
-  <text x="110" y="150" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#5b6576">{schema}.cases</text>
-  <text x="110" y="170" text-anchor="middle" font-size="11" fill="#5b6576">or synthetic (8,000 cases)</text>
-  <rect x="20" y="212" width="180" height="88" rx="10" fill="#f4f6f9" stroke="#1b2433" stroke-width="1.4"/>
-  <text x="110" y="238" text-anchor="middle" font-size="14" font-weight="700" fill="#1b2433">customers</text>
-  <text x="110" y="258" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#5b6576">{schema}.customers</text>
-  <text x="110" y="278" text-anchor="middle" font-size="11" fill="#5b6576">or synthetic (1,500)</text>
+  <text x="222" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#d9480f">① LAYERED ARCHITECTURE · LAKEFLOW PIPELINE</text>
+  <rect x="20" y="104" width="150" height="88" rx="10" fill="#f4f6f9" stroke="#1b2433" stroke-width="1.4"/>
+  <text x="95" y="130" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2433">annuity_policy</text>
+  <text x="95" y="150" text-anchor="middle" font-size="11" fill="#5b6576">already sourced</text>
+  <text x="95" y="170" text-anchor="middle" font-size="11" fill="#5b6576">or synthetic (3,000)</text>
+  <rect x="20" y="212" width="150" height="88" rx="10" fill="#f4f6f9" stroke="#1b2433" stroke-width="1.4"/>
+  <text x="95" y="238" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2433">life_policy</text>
+  <text x="95" y="258" text-anchor="middle" font-size="11" fill="#5b6576">already sourced</text>
+  <text x="95" y="278" text-anchor="middle" font-size="11" fill="#5b6576">or synthetic (5,000)</text>
 
-  <!-- profile/join -->
-  <rect x="235" y="104" width="190" height="196" rx="10" fill="#fff" stroke="#1b2433" stroke-width="1.2"/>
-  <text x="330" y="130" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2433">SQL Editor</text>
-  <text x="330" y="152" text-anchor="middle" font-size="11.5" fill="#1b2433">profile both tables</text>
-  <text x="330" y="170" text-anchor="middle" font-size="11" fill="#5b6576">key uniqueness · orphans ·</text>
-  <text x="330" y="186" text-anchor="middle" font-size="11" fill="#5b6576">messy status values</text>
-  <text x="330" y="214" text-anchor="middle" font-size="11.5" fill="#1b2433">LEFT JOIN on</text>
-  <text x="330" y="232" text-anchor="middle" font-size="11.5" font-family="Consolas, monospace" fill="#1b2433">customer_id</text>
-  <text x="330" y="258" text-anchor="middle" font-size="11" fill="#5b6576">missing customer →</text>
-  <text x="330" y="274" text-anchor="middle" font-size="11" fill="#5b6576">segment 'Unknown'</text>
-  <line x1="200" y1="148" x2="231" y2="170" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
-  <line x1="200" y1="256" x2="231" y2="234" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+  <!-- pipeline: ruby + diamond -->
+  <rect x="190" y="104" width="245" height="196" rx="12" fill="#fff" stroke="#1b2433" stroke-width="1.2" stroke-dasharray="5 3"/>
+  <text x="312" y="120" text-anchor="middle" font-size="10.5" fill="#5b6576">serverless pipeline · pipeline/policy_layers.sql</text>
+  <rect x="202" y="128" width="221" height="74" rx="8" fill="#fbe9ec" stroke="#b4234a" stroke-width="1.6"/>
+  <text x="312" y="149" text-anchor="middle" font-size="13" font-weight="700" fill="#b4234a">Ruby <tspan font-family="Consolas, monospace">policy_ruby</tspan></text>
+  <text x="312" y="168" text-anchor="middle" font-size="11" fill="#1b2433">UNION of both tables · mapped columns</text>
+  <text x="312" y="184" text-anchor="middle" font-size="11" fill="#5b6576">product_line · standard status · expectations</text>
+  <rect x="202" y="216" width="221" height="74" rx="8" fill="#e8f3fb" stroke="#2272b4" stroke-width="1.6"/>
+  <text x="312" y="237" text-anchor="middle" font-size="13" font-weight="700" fill="#2272b4">Diamond <tspan font-family="Consolas, monospace">policy_diamond</tspan></text>
+  <text x="312" y="256" text-anchor="middle" font-size="11" fill="#1b2433">5 reporting columns</text>
+  <text x="312" y="272" text-anchor="middle" font-size="10.5" fill="#5b6576">number · line · status · issue date · premium</text>
+  <line x1="312" y1="202" x2="312" y2="213" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="170" y1="148" x2="198" y2="160" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="170" y1="256" x2="198" y2="176" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
 
-  <!-- gold + metrics -->
-  <text x="595" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#d9480f">② GOLD VIEW + CERTIFIED METRICS · UNITY CATALOG</text>
+  <!-- after the table -->
+  <text x="595" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#d9480f">② AFTER THE TABLE · UNITY CATALOG</text>
   <rect x="455" y="104" width="280" height="196" rx="12" fill="#fdeee6" stroke="#d9480f" stroke-width="1.6"/>
   <rect x="471" y="118" width="248" height="74" rx="8" fill="#fff" stroke="#1b2433"/>
-  <text x="595" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#1b2433">Gold view <tspan font-family="Consolas, monospace">case_customer</tspan></text>
-  <text x="595" y="160" text-anchor="middle" font-size="11" fill="#5b6576">one row per case + customer · column comments</text>
-  <text x="595" y="176" text-anchor="middle" font-size="11" fill="#5b6576">is_open · days_to_close · within_sla</text>
+  <text x="595" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#1b2433">Catalog Explorer</text>
+  <text x="595" y="160" text-anchor="middle" font-size="11" fill="#5b6576">lineage source → ruby → diamond · column docs</text>
+  <text x="595" y="176" text-anchor="middle" font-size="11" fill="#5b6576">data-quality results · owner · refresh schedule</text>
   <rect x="471" y="206" width="248" height="82" rx="8" fill="#fff" stroke="#d9480f" stroke-width="1.8"/>
-  <text x="595" y="228" text-anchor="middle" font-size="13" font-weight="700" fill="#d9480f">Metric view <tspan font-family="Consolas, monospace">case_metrics</tspan></text>
-  <text x="595" y="248" text-anchor="middle" font-size="11" fill="#1b2433">total · open · avg days to close · SLA met rate</text>
+  <text x="595" y="228" text-anchor="middle" font-size="13" font-weight="700" fill="#d9480f">Metric view <tspan font-family="Consolas, monospace">policy_metrics</tspan></text>
+  <text x="595" y="248" text-anchor="middle" font-size="11" fill="#1b2433">policies · in force · in-force rate · premium</text>
   <text x="595" y="264" text-anchor="middle" font-size="11" fill="#5b6576">defined once · synonyms · certified tag</text>
   <text x="595" y="280" text-anchor="middle" font-size="10.5" fill="#5b6576">queried with MEASURE()</text>
   <line x1="595" y1="192" x2="595" y2="203" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
-  <line x1="425" y1="200" x2="451" y2="200" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="423" y1="253" x2="451" y2="253" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
 
   <!-- consumers -->
   <text x="935" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#d9480f">③ AI/BI DASHBOARD</text>
   <rect x="770" y="104" width="410" height="90" rx="10" fill="#fff" stroke="#d9480f" stroke-width="1.8"/>
-  <text x="975" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#d9480f">Case Overview dashboard · report developers</text>
+  <text x="975" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#d9480f">Policy Overview dashboard · report developers</text>
   <text x="975" y="148" text-anchor="middle" font-size="11.5" fill="#1b2433">KPI counters · monthly trend · breakdowns · certified-metrics table</text>
-  <text x="975" y="166" text-anchor="middle" font-size="11" fill="#5b6576">filters: region · segment · case type · published, shareable link</text>
+  <text x="975" y="166" text-anchor="middle" font-size="11" fill="#5b6576">filters: product line · status · published, shareable link</text>
   <text x="975" y="183" text-anchor="middle" font-size="11" fill="#5b6576">no embedded credentials → each viewer's own UC permissions</text>
   <text x="935" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#d9480f">④ GENIE</text>
   <rect x="770" y="232" width="410" height="90" rx="10" fill="#fff" stroke="#d9480f" stroke-width="1.8"/>
@@ -68,8 +70,8 @@
   <rect x="770" y="344" width="410" height="80" rx="10" fill="#f4f6f9" stroke="#1b2433" stroke-width="1.4"/>
   <text x="975" y="368" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1b2433">⑤ Report developers + business users</text>
   <text x="975" y="386" text-anchor="middle" font-size="11" fill="#1b2433">account-level Entra ID group</text>
-  <text x="975" y="401" text-anchor="middle" font-size="11" fill="#1b2433">SELECT on gold · CAN RUN dashboard · CAN RUN Genie</text>
-  <text x="975" y="416" text-anchor="middle" font-size="10.5" fill="#5b6576">source tables stay private; row filters apply per viewer</text>
+  <text x="975" y="401" text-anchor="middle" font-size="11" fill="#1b2433">SELECT on diamond only · CAN RUN dashboard · CAN RUN Genie</text>
+  <text x="975" y="416" text-anchor="middle" font-size="10.5" fill="#5b6576">sources and ruby stay private; row filters apply per viewer</text>
   <line x1="975" y1="344" x2="975" y2="326" stroke="#1b2433" stroke-width="1.4" marker-end="url(#a)"/>
 
 
@@ -93,8 +95,8 @@
     <text x="439" y="600" fill="#5b6576">(SQL Editor, dashboards, Genie authoring)</text>
     <text x="421" y="624">✓ Consumer access or Databricks SQL for viewers</text>
     <text x="421" y="648">✓ UC: USE CATALOG / SCHEMA + SELECT on sources;</text>
-    <text x="439" y="664" fill="#5b6576">CREATE SCHEMA (or a gold schema per attendee)</text>
-    <text x="421" y="688">✓ Serverless notebooks (guided notebook)</text>
+    <text x="439" y="664" fill="#5b6576">CREATE SCHEMA in the target (or one per attendee)</text>
+    <text x="421" y="688">✓ Serverless pipelines + notebooks</text>
     <text x="421" y="712">✓ Git folders + Git provider credentials</text>
     <text x="421" y="736">✓ Optional: ASSIGN on system.certification_status</text>
     <text x="439" y="752" fill="#5b6576">(to tag the metric view as certified)</text>
@@ -107,10 +109,10 @@
     <text x="874" y="592" fill="#5b6576">Genie are built into the workspace.</text>
     <text x="856" y="618">€ Genie One / Genie Agents: free for users</text>
     <text x="874" y="634" fill="#5b6576">until 31 Jan 2027 (service principals billed).</text>
-    <text x="856" y="660">⚠ Build the gold view and metric view</text>
-    <text x="874" y="676" fill="#5b6576">(Module 2) before creating the dashboard</text>
+    <text x="856" y="660">⚠ Run the pipeline and create the metric</text>
+    <text x="874" y="676" fill="#5b6576">view (Modules 1–2) before the dashboard</text>
     <text x="874" y="692" fill="#5b6576">and the Genie Agent.</text>
-    <text x="856" y="718">⚠ Row filters apply to tables, not views:</text>
-    <text x="874" y="734" fill="#5b6576">filter the source table that feeds the view.</text>
+    <text x="856" y="718">⚠ Own tables? Only the ruby SELECTs change:</text>
+    <text x="874" y="734" fill="#5b6576">map source columns to the ruby names.</text>
   </g>
 </svg>

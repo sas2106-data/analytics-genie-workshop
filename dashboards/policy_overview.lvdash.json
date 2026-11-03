@@ -1,38 +1,40 @@
 {
   "datasets": [
     {
-      "name": "cases",
-      "displayName": "Cases (gold view)",
+      "name": "policies",
+      "displayName": "Policies (diamond)",
       "queryLines": [
-        "SELECT case_id, opened_month, case_type, channel, priority, segment, region,\n",
-        "       CAST(is_open AS INT) AS is_open, days_to_close, CAST(within_sla AS INT) AS within_sla\n",
-        "FROM case_customer"
+        "SELECT policy_number, product_line, policy_status, issue_date,\n",
+        "       CAST(date_trunc('month', issue_date) AS DATE) AS issue_month,\n",
+        "       CASE WHEN policy_status = 'In force' THEN 1 ELSE 0 END AS is_in_force, premium_amount\n",
+        "FROM policy_diamond"
       ]
     },
     {
       "name": "certified",
       "displayName": "Certified metrics (metric view)",
       "queryLines": [
-        "SELECT segment, region,\n",
-        "       MEASURE(total_cases) AS total_cases, MEASURE(open_cases) AS open_cases,\n",
-        "       MEASURE(avg_days_to_close) AS avg_days_to_close, MEASURE(sla_met_rate) AS sla_met_rate,\n",
-        "       MEASURE(customers_with_cases) AS customers_with_cases\n",
-        "FROM case_metrics\nGROUP BY ALL"
+        "SELECT product_line, policy_status,\n",
+        "       MEASURE(total_policies) AS total_policies, MEASURE(in_force_policies) AS in_force_policies,\n",
+        "       MEASURE(in_force_rate) AS in_force_rate, MEASURE(total_premium) AS total_premium,\n",
+        "       MEASURE(avg_premium) AS avg_premium\n",
+        "FROM policy_metrics\nGROUP BY ALL"
       ]
     }
   ],
   "pages": [
     {
       "name": "75207bb0",
-      "displayName": "Case overview",
+      "displayName": "Policy Overview",
+      "pageType": "PAGE_TYPE_CANVAS",
       "layout": [
         {
           "widget": {
-            "name": "f7f8a850",
+            "name": "a1000001",
             "multilineTextboxSpec": {
               "lines": [
-                "## Case Overview\n",
-                "Gold view `case_customer` and certified metric view `case_metrics` \u00b7 synthetic data \u00b7 use the filters to slice by region, segment and case type\n"
+                "## Policy Overview\n",
+                "Diamond table `policy_diamond` and certified metric view `policy_metrics` \u00b7 built by the ruby \u2192 diamond pipeline \u00b7 synthetic data \u00b7 filter by product line and status\n"
               ]
             }
           },
@@ -45,29 +47,29 @@
         },
         {
           "widget": {
-            "name": "aec9e98a",
+            "name": "a1000002",
             "queries": [
               {
-                "name": "f_region_cases",
+                "name": "f_product_line_policies",
                 "query": {
-                  "datasetName": "cases",
+                  "datasetName": "policies",
                   "fields": [
                     {
-                      "name": "region",
-                      "expression": "`region`"
+                      "name": "product_line",
+                      "expression": "`product_line`"
                     }
                   ],
                   "disaggregated": false
                 }
               },
               {
-                "name": "f_region_certified",
+                "name": "f_product_line_certified",
                 "query": {
                   "datasetName": "certified",
                   "fields": [
                     {
-                      "name": "region",
-                      "expression": "`region`"
+                      "name": "product_line",
+                      "expression": "`product_line`"
                     }
                   ],
                   "disaggregated": false
@@ -80,55 +82,55 @@
               "encodings": {
                 "fields": [
                   {
-                    "fieldName": "region",
-                    "displayName": "Region",
-                    "queryName": "f_region_cases"
+                    "fieldName": "product_line",
+                    "displayName": "Product line",
+                    "queryName": "f_product_line_policies"
                   },
                   {
-                    "fieldName": "region",
-                    "displayName": "Region",
-                    "queryName": "f_region_certified"
+                    "fieldName": "product_line",
+                    "displayName": "Product line",
+                    "queryName": "f_product_line_certified"
                   }
                 ]
               },
               "frame": {
                 "showTitle": true,
-                "title": "Region"
+                "title": "Product line"
               }
             }
           },
           "position": {
             "x": 0,
             "y": 2,
-            "width": 2,
+            "width": 3,
             "height": 2
           }
         },
         {
           "widget": {
-            "name": "896d5628",
+            "name": "a1000003",
             "queries": [
               {
-                "name": "f_segment_cases",
+                "name": "f_policy_status_policies",
                 "query": {
-                  "datasetName": "cases",
+                  "datasetName": "policies",
                   "fields": [
                     {
-                      "name": "segment",
-                      "expression": "`segment`"
+                      "name": "policy_status",
+                      "expression": "`policy_status`"
                     }
                   ],
                   "disaggregated": false
                 }
               },
               {
-                "name": "f_segment_certified",
+                "name": "f_policy_status_certified",
                 "query": {
                   "datasetName": "certified",
                   "fields": [
                     {
-                      "name": "segment",
-                      "expression": "`segment`"
+                      "name": "policy_status",
+                      "expression": "`policy_status`"
                     }
                   ],
                   "disaggregated": false
@@ -141,85 +143,42 @@
               "encodings": {
                 "fields": [
                   {
-                    "fieldName": "segment",
-                    "displayName": "Segment",
-                    "queryName": "f_segment_cases"
+                    "fieldName": "policy_status",
+                    "displayName": "Policy status",
+                    "queryName": "f_policy_status_policies"
                   },
                   {
-                    "fieldName": "segment",
-                    "displayName": "Segment",
-                    "queryName": "f_segment_certified"
+                    "fieldName": "policy_status",
+                    "displayName": "Policy status",
+                    "queryName": "f_policy_status_certified"
                   }
                 ]
               },
               "frame": {
                 "showTitle": true,
-                "title": "Segment"
+                "title": "Policy status"
               }
             }
           },
           "position": {
-            "x": 2,
+            "x": 3,
             "y": 2,
-            "width": 2,
+            "width": 3,
             "height": 2
           }
         },
         {
           "widget": {
-            "name": "eb2c9dff",
-            "queries": [
-              {
-                "name": "f_case_type_cases",
-                "query": {
-                  "datasetName": "cases",
-                  "fields": [
-                    {
-                      "name": "case_type",
-                      "expression": "`case_type`"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              }
-            ],
-            "spec": {
-              "version": 2,
-              "widgetType": "filter-multi-select",
-              "encodings": {
-                "fields": [
-                  {
-                    "fieldName": "case_type",
-                    "displayName": "Case type",
-                    "queryName": "f_case_type_cases"
-                  }
-                ]
-              },
-              "frame": {
-                "showTitle": true,
-                "title": "Case type"
-              }
-            }
-          },
-          "position": {
-            "x": 4,
-            "y": 2,
-            "width": 2,
-            "height": 2
-          }
-        },
-        {
-          "widget": {
-            "name": "60d54f89",
+            "name": "a1000004",
             "queries": [
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "cases",
+                  "datasetName": "policies",
                   "fields": [
                     {
-                      "name": "total_cases",
-                      "expression": "COUNT(`case_id`)"
+                      "name": "total_policies",
+                      "expression": "COUNT(`policy_number`)"
                     }
                   ],
                   "disaggregated": false
@@ -231,8 +190,8 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "total_cases",
-                  "displayName": "Total cases",
+                  "fieldName": "total_policies",
+                  "displayName": "Total policies",
                   "format": {
                     "type": "number-plain",
                     "decimalPlaces": {
@@ -244,7 +203,7 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "Total cases"
+                "title": "Total policies"
               }
             }
           },
@@ -257,16 +216,16 @@
         },
         {
           "widget": {
-            "name": "9cc45a46",
+            "name": "a1000005",
             "queries": [
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "cases",
+                  "datasetName": "policies",
                   "fields": [
                     {
-                      "name": "open_cases",
-                      "expression": "SUM(`is_open`)"
+                      "name": "in_force",
+                      "expression": "SUM(`is_in_force`)"
                     }
                   ],
                   "disaggregated": false
@@ -278,8 +237,8 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "open_cases",
-                  "displayName": "Open cases",
+                  "fieldName": "in_force",
+                  "displayName": "In-force policies",
                   "format": {
                     "type": "number-plain",
                     "decimalPlaces": {
@@ -291,7 +250,7 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "Open cases"
+                "title": "In-force policies"
               }
             }
           },
@@ -304,16 +263,16 @@
         },
         {
           "widget": {
-            "name": "7d03a017",
+            "name": "a1000006",
             "queries": [
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "cases",
+                  "datasetName": "policies",
                   "fields": [
                     {
-                      "name": "avg_days",
-                      "expression": "AVG(`days_to_close`)"
+                      "name": "in_force_rate",
+                      "expression": "AVG(`is_in_force`)"
                     }
                   ],
                   "disaggregated": false
@@ -325,10 +284,10 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "avg_days",
-                  "displayName": "Avg days to close",
+                  "fieldName": "in_force_rate",
+                  "displayName": "In-force rate",
                   "format": {
-                    "type": "number-plain",
+                    "type": "number-percent",
                     "decimalPlaces": {
                       "type": "exact",
                       "places": 1
@@ -338,7 +297,7 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "Avg days to close"
+                "title": "In-force rate"
               }
             }
           },
@@ -351,16 +310,16 @@
         },
         {
           "widget": {
-            "name": "311b3a19",
+            "name": "a1000007",
             "queries": [
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "cases",
+                  "datasetName": "policies",
                   "fields": [
                     {
-                      "name": "sla_rate",
-                      "expression": "AVG(`within_sla`)"
+                      "name": "total_premium",
+                      "expression": "SUM(`premium_amount`)"
                     }
                   ],
                   "disaggregated": false
@@ -372,12 +331,14 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "sla_rate",
-                  "displayName": "SLA met (closed cases)",
+                  "fieldName": "total_premium",
+                  "displayName": "Total premium",
                   "format": {
-                    "type": "number-percent",
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
                     "decimalPlaces": {
-                      "type": "exact",
+                      "type": "max",
                       "places": 1
                     }
                   }
@@ -385,7 +346,7 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "SLA met (closed cases)"
+                "title": "Total premium"
               }
             }
           },
@@ -398,24 +359,24 @@
         },
         {
           "widget": {
-            "name": "8e8bb806",
+            "name": "a1000008",
             "queries": [
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "cases",
+                  "datasetName": "policies",
                   "fields": [
                     {
-                      "name": "opened_month",
-                      "expression": "`opened_month`"
+                      "name": "issue_month",
+                      "expression": "`issue_month`"
                     },
                     {
-                      "name": "cases",
-                      "expression": "COUNT(`case_id`)"
+                      "name": "policies",
+                      "expression": "COUNT(`policy_number`)"
                     },
                     {
-                      "name": "case_type",
-                      "expression": "`case_type`"
+                      "name": "product_line",
+                      "expression": "`product_line`"
                     }
                   ],
                   "disaggregated": false
@@ -427,39 +388,37 @@
               "widgetType": "line",
               "encodings": {
                 "x": {
-                  "fieldName": "opened_month",
+                  "fieldName": "issue_month",
                   "scale": {
                     "type": "temporal"
                   },
-                  "displayName": "Opened month"
+                  "displayName": "Issue month"
                 },
                 "y": {
-                  "fieldName": "cases",
+                  "fieldName": "policies",
                   "scale": {
                     "type": "quantitative"
                   },
-                  "displayName": "Cases"
+                  "displayName": "Policies issued"
                 },
                 "color": {
-                  "fieldName": "case_type",
+                  "fieldName": "product_line",
                   "scale": {
                     "type": "categorical"
                   },
-                  "displayName": "Case type"
+                  "displayName": "Product line"
                 }
               },
               "frame": {
                 "showTitle": true,
-                "title": "Cases opened per month by case type"
+                "title": "Policies issued per month by product line"
               },
               "mark": {
                 "colors": [
                   "#1B3139",
                   "#FF3621",
                   "#00A972",
-                  "#F2A900",
-                  "#2272B4",
-                  "#8BCAE7"
+                  "#F2A900"
                 ]
               }
             }
@@ -473,20 +432,20 @@
         },
         {
           "widget": {
-            "name": "c08728a9",
+            "name": "a1000009",
             "queries": [
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "cases",
+                  "datasetName": "policies",
                   "fields": [
                     {
-                      "name": "case_type",
-                      "expression": "`case_type`"
+                      "name": "policy_status",
+                      "expression": "`policy_status`"
                     },
                     {
-                      "name": "open_cases",
-                      "expression": "SUM(`is_open`)"
+                      "name": "policies",
+                      "expression": "COUNT(`policy_number`)"
                     }
                   ],
                   "disaggregated": false
@@ -498,21 +457,21 @@
               "widgetType": "bar",
               "encodings": {
                 "y": {
-                  "fieldName": "case_type",
+                  "fieldName": "policy_status",
                   "scale": {
                     "type": "categorical",
                     "sort": {
                       "by": "x-reversed"
                     }
                   },
-                  "displayName": "Case type"
+                  "displayName": "Status"
                 },
                 "x": {
-                  "fieldName": "open_cases",
+                  "fieldName": "policies",
                   "scale": {
                     "type": "quantitative"
                   },
-                  "displayName": "Open cases",
+                  "displayName": "Policies",
                   "format": {
                     "type": "number-plain",
                     "decimalPlaces": {
@@ -527,7 +486,7 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "Open cases by case type"
+                "title": "Policies by status"
               },
               "mark": {
                 "colors": [
@@ -545,20 +504,20 @@
         },
         {
           "widget": {
-            "name": "c4b50fd5",
+            "name": "a100000a",
             "queries": [
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "cases",
+                  "datasetName": "policies",
                   "fields": [
                     {
-                      "name": "channel",
-                      "expression": "`channel`"
+                      "name": "product_line",
+                      "expression": "`product_line`"
                     },
                     {
-                      "name": "avg_days",
-                      "expression": "AVG(`days_to_close`)"
+                      "name": "premium",
+                      "expression": "SUM(`premium_amount`)"
                     }
                   ],
                   "disaggregated": false
@@ -570,25 +529,27 @@
               "widgetType": "bar",
               "encodings": {
                 "y": {
-                  "fieldName": "channel",
+                  "fieldName": "product_line",
                   "scale": {
                     "type": "categorical",
                     "sort": {
                       "by": "x-reversed"
                     }
                   },
-                  "displayName": "Channel"
+                  "displayName": "Product line"
                 },
                 "x": {
-                  "fieldName": "avg_days",
+                  "fieldName": "premium",
                   "scale": {
                     "type": "quantitative"
                   },
-                  "displayName": "Avg days to close",
+                  "displayName": "Total premium",
                   "format": {
-                    "type": "number-plain",
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
                     "decimalPlaces": {
-                      "type": "exact",
+                      "type": "max",
                       "places": 1
                     }
                   }
@@ -599,7 +560,7 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "Avg days to close by channel"
+                "title": "Total premium by product line"
               },
               "mark": {
                 "colors": [
@@ -617,20 +578,20 @@
         },
         {
           "widget": {
-            "name": "9a48e0d9",
+            "name": "a100000b",
             "queries": [
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "cases",
+                  "datasetName": "policies",
                   "fields": [
                     {
-                      "name": "priority",
-                      "expression": "`priority`"
+                      "name": "product_line",
+                      "expression": "`product_line`"
                     },
                     {
-                      "name": "sla_rate",
-                      "expression": "AVG(`within_sla`)"
+                      "name": "avg_premium",
+                      "expression": "AVG(`premium_amount`)"
                     }
                   ],
                   "disaggregated": false
@@ -642,26 +603,28 @@
               "widgetType": "bar",
               "encodings": {
                 "y": {
-                  "fieldName": "priority",
+                  "fieldName": "product_line",
                   "scale": {
                     "type": "categorical",
                     "sort": {
                       "by": "x-reversed"
                     }
                   },
-                  "displayName": "Priority"
+                  "displayName": "Product line"
                 },
                 "x": {
-                  "fieldName": "sla_rate",
+                  "fieldName": "avg_premium",
                   "scale": {
                     "type": "quantitative"
                   },
-                  "displayName": "SLA met",
+                  "displayName": "Average premium",
                   "format": {
-                    "type": "number-percent",
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
                     "decimalPlaces": {
-                      "type": "exact",
-                      "places": 0
+                      "type": "max",
+                      "places": 1
                     }
                   }
                 },
@@ -671,7 +634,7 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "SLA met by priority"
+                "title": "Average premium by product line"
               },
               "mark": {
                 "colors": [
@@ -689,7 +652,7 @@
         },
         {
           "widget": {
-            "name": "52b3a914",
+            "name": "a100000c",
             "queries": [
               {
                 "name": "main_query",
@@ -697,32 +660,32 @@
                   "datasetName": "certified",
                   "fields": [
                     {
-                      "name": "segment",
-                      "expression": "`segment`"
+                      "name": "product_line",
+                      "expression": "`product_line`"
                     },
                     {
-                      "name": "region",
-                      "expression": "`region`"
+                      "name": "policy_status",
+                      "expression": "`policy_status`"
                     },
                     {
-                      "name": "total_cases",
-                      "expression": "`total_cases`"
+                      "name": "total_policies",
+                      "expression": "`total_policies`"
                     },
                     {
-                      "name": "open_cases",
-                      "expression": "`open_cases`"
+                      "name": "in_force_policies",
+                      "expression": "`in_force_policies`"
                     },
                     {
-                      "name": "avg_days_to_close",
-                      "expression": "`avg_days_to_close`"
+                      "name": "in_force_rate",
+                      "expression": "`in_force_rate`"
                     },
                     {
-                      "name": "sla_met_rate",
-                      "expression": "`sla_met_rate`"
+                      "name": "total_premium",
+                      "expression": "`total_premium`"
                     },
                     {
-                      "name": "customers_with_cases",
-                      "expression": "`customers_with_cases`"
+                      "name": "avg_premium",
+                      "expression": "`avg_premium`"
                     }
                   ],
                   "disaggregated": true
@@ -735,16 +698,16 @@
               "encodings": {
                 "columns": [
                   {
-                    "fieldName": "segment",
-                    "displayName": "Segment"
+                    "fieldName": "product_line",
+                    "displayName": "Product line"
                   },
                   {
-                    "fieldName": "region",
-                    "displayName": "Region"
+                    "fieldName": "policy_status",
+                    "displayName": "Status"
                   },
                   {
-                    "fieldName": "total_cases",
-                    "displayName": "Total cases",
+                    "fieldName": "total_policies",
+                    "displayName": "Policies",
                     "format": {
                       "type": "number-plain",
                       "decimalPlaces": {
@@ -754,8 +717,8 @@
                     }
                   },
                   {
-                    "fieldName": "open_cases",
-                    "displayName": "Open cases",
+                    "fieldName": "in_force_policies",
+                    "displayName": "In force",
                     "format": {
                       "type": "number-plain",
                       "decimalPlaces": {
@@ -765,19 +728,8 @@
                     }
                   },
                   {
-                    "fieldName": "avg_days_to_close",
-                    "displayName": "Avg days to close",
-                    "format": {
-                      "type": "number-plain",
-                      "decimalPlaces": {
-                        "type": "exact",
-                        "places": 1
-                      }
-                    }
-                  },
-                  {
-                    "fieldName": "sla_met_rate",
-                    "displayName": "SLA met rate",
+                    "fieldName": "in_force_rate",
+                    "displayName": "In-force rate",
                     "format": {
                       "type": "number-percent",
                       "decimalPlaces": {
@@ -787,13 +739,28 @@
                     }
                   },
                   {
-                    "fieldName": "customers_with_cases",
-                    "displayName": "Customers",
+                    "fieldName": "total_premium",
+                    "displayName": "Total premium",
                     "format": {
-                      "type": "number-plain",
+                      "type": "number-currency",
+                      "currencyCode": "USD",
+                      "abbreviation": "compact",
                       "decimalPlaces": {
-                        "type": "exact",
-                        "places": 0
+                        "type": "max",
+                        "places": 1
+                      }
+                    }
+                  },
+                  {
+                    "fieldName": "avg_premium",
+                    "displayName": "Avg premium",
+                    "format": {
+                      "type": "number-currency",
+                      "currencyCode": "USD",
+                      "abbreviation": "compact",
+                      "decimalPlaces": {
+                        "type": "max",
+                        "places": 1
                       }
                     }
                   }
@@ -801,7 +768,7 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "Certified metrics by segment and region (metric view case_metrics)"
+                "title": "Certified metrics by product line and status (metric view policy_metrics)"
               }
             }
           },
@@ -812,8 +779,7 @@
             "height": 7
           }
         }
-      ],
-      "pageType": "PAGE_TYPE_CANVAS"
+      ]
     }
   ]
 }

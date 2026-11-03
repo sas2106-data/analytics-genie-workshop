@@ -1,13 +1,16 @@
-# Two Tables → Gold View → Certified Metrics → Dashboard + Genie: step-by-step
+# Two Tables → Ruby → Diamond → Certified Metrics → Dashboard + Genie: step-by-step
 
-**Audience:** report developers · **Duration:** 3.5 hours with 2 breaks · **Compute:** serverless SQL warehouse · **Architecture:** [`docs/architecture.png`](docs/architecture.png)
+**Audience:** report developers · **Duration:** 3.5 hours with 2 breaks · **Compute:** serverless pipeline + serverless SQL warehouse · **Architecture:** [`docs/architecture.png`](docs/architecture.png)
 
 The flow:
-- **① Source → modeled dataset:** profile two tables and join them.
-- **② Gold view + certified metrics:** a documented view, plus a metric view.
+- **① Layered architecture & pipeline:** union two tables into **ruby**, pare down to 5 columns in **diamond**.
+- **② After the table:** data quality, lineage, documentation and a certified metric view.
 - **③ AI/BI dashboard** for report developers.
 - **④ Genie Agent** for business self-serve, on the same data.
 - **⑤ Governance, sharing and access control.**
+
+The build is deliberately small. The time goes on the layered architecture, the pipeline, and what you do with a table
+once you have one you like.
 
 ![Architecture](docs/architecture.png)
 
@@ -15,10 +18,11 @@ The flow:
 
 | Path | What it is |
 |---|---|
-| `sql/01_profile_and_join.sql` | Module 1, for the SQL Editor: profiling queries and the join |
-| `sql/02_gold_view.sql`, `sql/03_metric_view.sql` | Module 2, for the SQL Editor: the gold view `case_customer` and the metric view `case_metrics` |
-| `src/00_setup.py` … `02_metric_view.py` | The same steps as notebooks, run by the guided notebook (`setup` can also create synthetic data) |
-| `dashboards/case_overview.lvdash.json` | Module 3: the *Case Overview* AI/BI dashboard (answer key) |
+| `pipeline/policy_layers.sql` | Module 1: the Lakeflow pipeline, ruby `policy_ruby` (union) and diamond `policy_diamond` (5 columns) |
+| `sql/01_explore_sources.sql` | Module 1: a quick look at the two sources in the SQL Editor |
+| `sql/02_metric_view.sql` | Module 2: the certified metric view `policy_metrics` |
+| `src/00_setup.py`, `src/01_metric_view.py` | The same steps as notebooks, run by the guided notebook (`setup` can also create synthetic data) |
+| `dashboards/policy_overview.lvdash.json` | Module 3: the *Policy Overview* AI/BI dashboard (answer key) |
 | `genie/instructions.md` | Module 4: table descriptions, text instructions, example SQL and sample questions for the Genie Agent |
 | `notebooks/Workshop_Steps.py` | **Executable guide.** Runs modules 1 to 5 in code. Use it for dry runs or as the answer key |
 
@@ -33,109 +37,122 @@ The flow:
 4. Sync an Entra ID group for attendees and viewers into the **account**, e.g. `workshop-users`, and assign it to the workspace. Unity Catalog grants only accept account-level groups.
 
 **Workspace admin**
-5. Make sure there's a **serverless (or pro) SQL warehouse**, and give the group `CAN USE` on it.
-6. **Entitlements:**
+5. Make sure **serverless pipelines** and serverless notebooks are available.
+6. Make sure there's a **serverless (or pro) SQL warehouse**, and give the group `CAN USE` on it.
+7. **Entitlements:**
    - **Databricks SQL** for report developers (SQL Editor, dashboards, creating Genie Agents);
-   - **consumer access** or Databricks SQL for viewers.
-7. **Unity Catalog grants:**
-   - `USE CATALOG` on the catalog;
-   - `USE SCHEMA` and `SELECT` on the schema that holds `cases` and `customers`;
-   - `CREATE SCHEMA` on the catalog, or pre-create a gold schema per attendee.
-8. **Optional:** grant `ASSIGN` on the `system.certification_status` governed tag, so attendees can mark the metric view as certified.
-9. Make this repo available in your Git provider. Attendees clone it as a **Git folder** and need Git credentials set under **Settings → Linked accounts**.
+   - **consumer access** or Databricks SQL for viewers;
+   - permission to **create pipelines** for report developers.
+8. **Unity Catalog grants:**
+   - `USE CATALOG`, `USE SCHEMA` and `SELECT` on the two source tables;
+   - `USE CATALOG` and `CREATE SCHEMA` on the **target** catalog, or pre-create a schema per attendee. The target can be a different catalog from the sources.
+9. **Optional:** grant `ASSIGN` on the `system.certification_status` governed tag, so attendees can mark the metric view as certified.
+10. Make this repo available in your Git provider. Attendees clone it as a **Git folder** and need Git credentials set under **Settings → Linked accounts**.
 
-> **Not needed:** Databricks Apps, or any separate BI tool. AI/BI dashboards and Genie are built into the workspace.
+> **Not needed:** Databricks Apps, or any separate BI tool. Pipelines, AI/BI dashboards and Genie are built into the workspace.
 
 **Source data**
-- The workshop expects two tables that share `customer_id`:
-  - `cases(case_id, customer_id, case_type, channel, priority, status, opened_date, closed_date)`
-  - `customers(customer_id, customer_name, segment, region, customer_since, is_vip)`
-- If your names differ, map them in `sql/02_gold_view.sql` (and `src/01_gold_view.py`).
-- **No data yet?** Set `create_sample_data = true`. The setup step creates about 1,500 customers and about 8,000 cases, with messy status values and about 2% of cases whose customer is missing.
+- Two related tables that are already sourced: `annuity_policy` and `life_policy`.
+- They describe the same thing (a policy) with **different column names** and **different status values**. That's what the ruby layer resolves.
+- **Using your own tables?** Only the two `SELECT`s in `policy_ruby` change: map each column to the ruby names and adjust the status mapping. Everything after ruby stays the same.
+- **No data yet?** Set `create_sample_data = true`. The setup step creates about 3,000 annuity and 5,000 life policies, with inconsistent status spellings and a few rows with no policy number.
 
 **Dry run (facilitator)**
-1. Open `notebooks/Workshop_Steps` and set the widgets: `catalog`, `schema`, `warehouse_id` and `group_name`.
-2. Click **Run all**. It takes about 10 minutes and ends with links to the dashboard and the Genie Agent.
-3. Open both and check that they agree, for example on open cases by segment.
+1. Open `notebooks/Workshop_Steps` and set the widgets: the source catalog, schema and tables; the target catalog and schema; `warehouse_id` and `group_name`.
+2. Click **Run all**. It takes about 10 minutes and ends with links to the pipeline, dashboard and Genie Agent.
+3. Open the dashboard and the Genie Agent and check that they agree, for example on in-force policies by product line.
 4. Set `cleanup = yes` and run the last cell.
 
 ---
 
 ## 0:00 · Welcome & objectives (5 min)
 
-Introductions and goals for the day. Check that everyone can log in, open the **SQL Editor** and see the Git folder.
+Introductions and goals for the day. Check that everyone can log in, open **Jobs & Pipelines** and the **SQL Editor**, and see the Git folder.
 
 ## 0:05 · Overview of Databricks (10 min)
 
 | Platform area | What it does | Today |
 |---|---|---|
+| **Lakeflow pipelines** | Declarative pipelines: you write the tables as SQL, the pipeline works out the order, runs it and checks data quality | Module 1 |
 | **Unity Catalog** | One governance layer: grants, row filters, column masks, lineage, audit, certified assets | Modules 2 and 5 |
 | **Metric views** | Business measures defined once in Unity Catalog and reused by dashboards, Genie and SQL | Module 2 |
-| **Databricks SQL** | Serverless SQL warehouses and the SQL Editor | Modules 1 and 2 |
+| **Databricks SQL** | Serverless SQL warehouses and the SQL Editor | Modules 1–3 |
 | **AI/BI dashboards** | Governed, shareable dashboards built into the workspace | Module 3 |
 | **Genie** | Natural-language questions over governed data (Genie Agents and Genie One) | Module 4 |
 
-End on the architecture diagram: one dataset, two surfaces.
+End on the architecture diagram: **source → ruby → diamond**, then one diamond table feeding two surfaces.
 
-## 0:15 · Module 1 — Source to modeled dataset (30 min)
+## 0:15 · Module 1 — Layered architecture & the pipeline (30 min)
 
-1. Open the **SQL Editor**, choose the serverless warehouse, and paste in `sql/01_profile_and_join.sql`. Replace `<catalog>` and `<schema>`.
-2. Run each query and discuss what it shows:
-   - **Size and keys:** how many cases and customers there are, and how many distinct customer IDs appear in `cases`.
-   - **Key uniqueness:** `customer_id` must be unique in `customers`, or the join multiplies rows.
-   - **Orphans:** about 2% of cases have no matching customer. Decide between `INNER JOIN` (drops them) and `LEFT JOIN` (keeps them as `Unknown`). This workshop uses `LEFT JOIN`.
-   - **Data quality:** `status` comes in six spellings (`open`, `Open `, `Pending`, `closed`, `Closed`, `CLOSED`). Standardise it in the gold view.
-3. Run the join (query 5) and check the result.
-4. In Catalog Explorer, check **Lineage** for `cases` (it fills in after Module 2).
+| Layer | Table | What it's for |
+|---|---|---|
+| Source | `annuity_policy`, `life_policy` | Already sourced. Left as they are |
+| **Ruby** | `policy_ruby` | Both tables **unioned** into one conformed table: shared column names, a `product_line` column, standardised status. Rows without a policy number are dropped |
+| **Diamond** | `policy_diamond` | Pared down to the **5 columns** reporting needs: `policy_number`, `product_line`, `policy_status`, `issue_date`, `premium_amount` |
 
-## 0:45 · Module 2 — Gold view + certified metrics (35 min)
+1. **Look at the sources (5 min).** In the **SQL Editor**, run `sql/01_explore_sources.sql`. The tables use different column names (`policy_number` / `policy_no`, `contract_status` / `policy_status`) and status spellings. That's why the union needs a mapping.
+2. **Create the pipeline.** Go to **Jobs & Pipelines → Create → ETL pipeline**:
+   - name it `Policy layers (<you>)`;
+   - set the **default catalog and schema** to your target, e.g. `policy_layers_<you>`;
+   - choose **serverless**.
+3. In the **Lakeflow Pipelines Editor**, replace the sample code with `pipeline/policy_layers.sql` (or add the file from your Git folder).
+4. Under **Settings → Configuration**, add `source_catalog`, `source_schema`, `annuity_table = annuity_policy` and `life_table = life_policy`.
+5. Click **Run pipeline**, then walk through:
+   - **the pipeline graph:** source → `policy_ruby` → `policy_diamond`. The order comes from the SQL; you didn't write it;
+   - **row counts per table**, and the **expectations**: `has_policy_number` dropped the rows with no policy number;
+   - **the declarative idea:** each table is defined once, as a query. Change the diamond columns, run again, and only what's needed is recomputed.
+6. **Schedule it:** **Schedule → Add schedule** (e.g. daily). Everything downstream (metric view, dashboard, Genie) reads the latest diamond data with no changes.
 
-1. **Gold view:** run `sql/02_gold_view.sql`, replacing `<catalog>`, `<schema>` and `<gold_schema>`. It creates `case_customer`, with one row per case plus its customer. It standardises `status` and adds `is_open`, `days_to_close`, `sla_days` and `within_sla`, and every column has a comment.
-2. In **Catalog Explorer**, open `case_customer`. Look at the column comments in the **Overview** tab, the **Lineage** tab (back to `cases` and `customers`), and **Sample data**.
-3. **Certified metrics:** run `sql/03_metric_view.sql`. It creates the metric view `case_metrics`, which defines these measures once:
+## 0:45 · Module 2 — What happens after you've built a table you like (35 min)
+
+1. **Catalog Explorer → `policy_diamond`:**
+   - **Overview:** the table and column comments come from the pipeline SQL. Use **AI-generated** descriptions where they're missing;
+   - **Lineage:** `annuity_policy` and `life_policy` → `policy_ruby` → `policy_diamond`, down to column level;
+   - **Sample data** and **Details** (owner, which pipeline maintains it, last refresh).
+2. **Data quality:** in the pipeline, open each table's **Data quality** tab. Rows passed and failed per expectation.
+3. **Certified metrics:** run `sql/02_metric_view.sql`, replacing `<target_catalog>` and `<target_schema>`. It creates the metric view `policy_metrics` on the diamond table, which defines these measures once:
 
    | Measure | Definition |
    |---|---|
-   | `total_cases` | `COUNT(1)` |
-   | `open_cases` | not closed (open or pending) |
-   | `avg_days_to_close` | closed cases only |
-   | `sla_met_rate` | closed within 2, 5 or 10 days for high, medium or low priority |
-   | `customers_with_cases` | distinct customers |
-   | `cases_per_customer` | cases per distinct customer |
+   | `total_policies` | `COUNT(1)` |
+   | `in_force_policies` | status *In force* |
+   | `in_force_rate` | in-force policies ÷ all policies |
+   | `total_premium` | `SUM(premium_amount)` |
+   | `avg_premium` | `AVG(premium_amount)` |
 
-   It also defines the dimensions, with display names and synonyms that Genie uses.
+   It also defines the dimensions `product_line`, `policy_status`, `issue_year` and `issue_month`, with display names and synonyms that Genie uses.
 4. Query it, wrapping every measure in `MEASURE()`:
    ```sql
-   SELECT segment, MEASURE(total_cases), MEASURE(open_cases), MEASURE(avg_days_to_close), MEASURE(sla_met_rate)
-   FROM <catalog>.<gold_schema>.case_metrics GROUP BY ALL;
+   SELECT product_line, MEASURE(total_policies), MEASURE(in_force_rate), MEASURE(total_premium)
+   FROM <target_catalog>.<target_schema>.policy_metrics GROUP BY ALL;
    ```
 5. **Certify it:** run the last line of the script, which tags the view `system.certification_status = certified`. This needs `ASSIGN` on the tag. Show the certified badge in Catalog Explorer.
 
-> **Why a metric view?** If "SLA met" is computed in each chart or in each Genie answer, the numbers drift. Defining it once in Unity Catalog means the dashboard, Genie and ad-hoc SQL all agree.
+> **Why a metric view?** If "in-force rate" is computed in each chart or in each Genie answer, the numbers drift. Defining it once in Unity Catalog means the dashboard, Genie and ad-hoc SQL all agree.
 
 ## 1:20 · Break (15 min)
 
 ## 1:35 · Module 3 — Build the AI/BI dashboard (50 min)
 
 1. Go to **Dashboards → Create dashboard** and open the **Data** tab. Add two datasets:
-   - **Cases (gold view):** an SQL dataset that selects `case_id, opened_month, case_type, channel, priority, segment, region, is_open, days_to_close, within_sla` from `case_customer`. This dataset powers the interactive visuals and filters.
-   - **Certified metrics:** choose **Add data → `case_metrics`** to use the metric view directly. Or use SQL with `MEASURE()` grouped by `segment, region`.
-2. On the **Canvas**, build the visuals. `dashboards/case_overview.lvdash.json` is the answer key: import it with **Dashboards → Create → Import dashboard from file**, then set each dataset's catalog and schema to your gold schema in the **Data** tab.
+   - **Policies (diamond):** an SQL dataset that selects the 5 diamond columns, plus `issue_month` and an `is_in_force` flag, from `policy_diamond`. This dataset powers the interactive visuals and filters.
+   - **Certified metrics:** choose **Add data → `policy_metrics`** to use the metric view directly. Or use SQL with `MEASURE()` grouped by `product_line, policy_status`.
+2. On the **Canvas**, build the visuals. `dashboards/policy_overview.lvdash.json` is the answer key: import it with **Dashboards → Create → Import dashboard from file**, then set each dataset's catalog and schema to your target schema in the **Data** tab.
 
    | Visual | Field or measure |
    |---|---|
-   | Counter: Total cases | `COUNT(case_id)` |
-   | Counter: Open cases | `SUM(is_open)` |
-   | Counter: Avg days to close | `AVG(days_to_close)` |
-   | Counter: SLA met | `AVG(within_sla)`, formatted as a percentage |
-   | Line: cases per month | `opened_month` × `COUNT(case_id)`, coloured by `case_type` |
-   | Bar: open cases | by `case_type` |
-   | Bar: avg days to close | by `channel` |
-   | Bar: SLA met | by `priority` |
-   | Table: certified metrics | the metric view, by `segment` and `region` |
+   | Counter: Total policies | `COUNT(policy_number)` |
+   | Counter: In-force policies | `SUM(is_in_force)` |
+   | Counter: In-force rate | `AVG(is_in_force)`, formatted as a percentage |
+   | Counter: Total premium | `SUM(premium_amount)`, formatted as currency |
+   | Line: policies issued per month | `issue_month` × `COUNT(policy_number)`, coloured by `product_line` |
+   | Bar: policies | by `policy_status` |
+   | Bar: total premium | by `product_line` |
+   | Bar: average premium | by `product_line` |
+   | Table: certified metrics | the metric view, by `product_line` and `policy_status` |
 
-3. Add **filters**: multi-select on `region`, `segment` and `case_type`. Connect `region` and `segment` to both datasets.
-4. **Parameter exercise:** clone the *Cases* dataset, add `WHERE channel = :channel` (default `Web`), connect a single-select filter to the `channel` parameter, and point one bar chart at the clone.
+3. Add **filters**: multi-select on `product_line` and `policy_status`, connected to both datasets.
+4. **Parameter exercise:** clone the *Policies* dataset, add `WHERE issue_date >= :from_date` (default one year ago), connect a date filter to the parameter, and point the trend chart at the clone.
 5. **Publish:**
    - Turn **embed credentials** off, so viewers query with their own permissions.
    - **Share** with the group as **Can run**.
@@ -144,17 +161,16 @@ End on the architecture diagram: one dataset, two surfaces.
 
 ## 2:25 · Module 4 — Create the Genie Agent (35 min)
 
-1. Go to **Genie → New**, add `case_customer` and `case_metrics`, and choose the serverless warehouse.
+1. Go to **Genie → New**, add `policy_diamond` and `policy_metrics`, and choose the serverless warehouse.
 2. Under **Instructions**, paste the text instructions from `genie/instructions.md`:
    - prefer the metric view, using `MEASURE()`;
-   - define *open*, *SLA* and *days to close*;
-   - explain the `Unknown` segment;
+   - define *in force* and *premium* (annuity single premium vs life annualised premium);
    - set formatting rules.
 3. Add the two **example SQL** queries and the four **sample questions** from the same file.
 4. Test business-style questions:
-   - *How many cases are open by segment?* Compare with the dashboard: Retail is highest, and Genie should mention `Unknown`.
-   - *What is the SLA met rate by priority?*
-   - *Which channel takes longest to close?*, then follow up with *…and for VIP customers only?*
+   - *How many policies are in force by product line?* Compare with the dashboard.
+   - *What is the in-force rate by product line and issue year?*
+   - *What is the total premium for annuities issued in the last 12 months?*, then follow up with *…and for life?*
 5. In **Monitor**, look at the questions asked and the SQL that was generated. Turn a good answer into a new example query.
 
 ## 3:00 · Break (10 min)
@@ -163,28 +179,37 @@ End on the architecture diagram: one dataset, two surfaces.
 
 | Layer | Grant | Where |
 |---|---|---|
-| Data | `USE CATALOG` and `USE SCHEMA`, plus `SELECT` on the **gold** schema | Catalog Explorer → Permissions, or `GRANT …` |
+| Data | `USE CATALOG` and `USE SCHEMA`, plus `SELECT` on **`policy_diamond` and `policy_metrics` only** | Catalog Explorer → Permissions, or `GRANT …` |
+| Pipeline | **Can view** (optional, to see runs and data quality) | Pipeline → Permissions |
 | Dashboard | **Can run** (published) | Dashboard → Share |
 | Genie Agent | **Can run** | Genie → Share |
 
 ```sql
-GRANT USE CATALOG ON CATALOG <catalog> TO `workshop-users`;
-GRANT USE SCHEMA, SELECT ON SCHEMA <catalog>.<gold_schema> TO `workshop-users`;
+GRANT USE CATALOG ON CATALOG <target_catalog> TO `workshop-users`;
+GRANT USE SCHEMA ON SCHEMA <target_catalog>.<target_schema> TO `workshop-users`;
+GRANT SELECT ON TABLE <target_catalog>.<target_schema>.policy_diamond TO `workshop-users`;
+GRANT SELECT ON TABLE <target_catalog>.<target_schema>.policy_metrics TO `workshop-users`;
 ```
 
 Discussion points:
-- **The source tables stay private.** Viewers only need the gold schema, because the view reads the sources with its owner's rights.
+- **Each layer has its own audience.** Viewers get diamond only. Ruby and the sources stay with the people who build the pipeline.
 - **Embedded credentials:** off means each viewer's Unity Catalog permissions apply. On means everyone sees what the publisher can see.
 - **Genie:** compute runs on the author's embedded warehouse credentials, but **data access is always the end user's**.
-- **Demo: different rows per viewer.** Row filters apply to tables, so filter the `cases` source table:
+- **Demo: different rows per viewer.** Pipeline tables take a row filter in their definition. Create the function, then add it to `policy_diamond` in the pipeline SQL and run the pipeline again:
   ```sql
-  CREATE FUNCTION <catalog>.<schema>.channel_filter(ch STRING) RETURN
-    NOT is_account_group_member('workshop-users') OR ch IN ('Web', 'Phone');
-  ALTER TABLE <catalog>.<schema>.cases SET ROW FILTER <catalog>.<schema>.channel_filter ON (channel);
+  CREATE FUNCTION <target_catalog>.<target_schema>.product_filter(pl STRING) RETURN
+    NOT is_account_group_member('workshop-users') OR pl = 'Life';
   ```
-  Group members now see only Web and Phone cases in both the dashboard and Genie. Remove the filter with `ALTER TABLE … DROP ROW FILTER;`.
+  ```sql
+  CREATE OR REFRESH MATERIALIZED VIEW policy_diamond (
+    ...                                   -- columns and expectation as before
+  )
+  WITH ROW FILTER <target_catalog>.<target_schema>.product_filter ON (product_line)
+  COMMENT '...' AS SELECT ...;
+  ```
+  Group members now see only Life policies in both the dashboard and Genie. Remove the `WITH ROW FILTER` line and run again to undo.
 
-Wrap up: one governed dataset, two surfaces, one set of numbers.
+Wrap up: two sources, two layers, one governed table, two surfaces, one set of numbers.
 
 **Clean up:** run the notebook's last cell with `cleanup = yes`.
 
@@ -194,9 +219,11 @@ Wrap up: one governed dataset, two surfaces, one set of numbers.
 
 | Symptom | Fix |
 |---|---|
+| Pipeline fails with *TABLE_OR_VIEW_NOT_FOUND* on a source | Check the pipeline **Configuration** (`source_catalog`, `source_schema`, table names), and that you have `SELECT` on the sources. |
+| Pipeline fails with *UNRESOLVED_COLUMN* in `policy_ruby` | Your source columns have different names. Map them in the two `SELECT`s in `policy_ruby`. |
+| Many rows show `policy_status = 'Unknown'` | A status value isn't in the mapping. The `known_status` expectation counts them. Add the value to the `CASE`. |
 | `MEASURE` errors such as *cannot resolve* | Every measure from a metric view must be wrapped in `MEASURE(<name>)`. Dimensions are not. |
-| The join returns more rows than `cases` | `customer_id` isn't unique in `customers`. Run profiling query 2 and deduplicate first. |
-| Dashboard viewers see *Permission denied* | Embed credentials is off, so grant the viewer `SELECT` on the gold schema, or turn embedding on. |
+| Dashboard viewers see *Permission denied* | Embed credentials is off, so grant the viewer `SELECT` on `policy_diamond` and `policy_metrics`, or turn embedding on. |
 | The Genie sidebar icon shows but Genie won't open | Partner-powered AI features are off (account admin). |
 | `GRANT … TO workshop-users` fails with *PRINCIPAL_DOES_NOT_EXIST* | The group is workspace-local. Use an account-level group. |
 | `SET TAGS ('system.certification_status' …)` is denied | You need `ASSIGN` on that governed tag. Skip it, or ask an admin. |
